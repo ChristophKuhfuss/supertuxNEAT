@@ -319,6 +319,15 @@ endif()
 
 INCLUDE(ConfigureChecks)
 
+## Also build external/accneat
+IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/external/accneat/Makefile.conf)
+  execute_process(COMMAND ./configure
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/accneat)
+ENDIF()
+
+ExternalProject_Add(accneat
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/accneat/"
+  BUILD_COMMAND "cd ${CMAKE_SOURCE_DIR}/external/accneat && make")
 
 ## Also build external/squirrel
 
