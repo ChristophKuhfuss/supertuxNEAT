@@ -10,8 +10,8 @@
 using namespace NEAT;
 
 struct NeatInputs  {
-  double[][] sensors;
-}
+  double sensors[10][10];
+};
 
 struct NeatOutputs {
     double direction_up;
@@ -20,7 +20,7 @@ struct NeatOutputs {
     double direction_right;
     double jump;
     double action;
-}
+};
 
 class TuxEvolution {
 private:
@@ -32,6 +32,7 @@ private:
   
 public:
   TuxEvolution();
+  TuxEvolution(char* paramfile);
   ~TuxEvolution();
   void tux_epoch();
   void on_tux_death(double progress, double score);
@@ -44,7 +45,7 @@ public:
 private:
   void tux_evaluate();
   void propagate_inputs(NeatInputs inputs);
-}
+};
 
 #endif /* HEADER_TUX_EVOLUTION */
 

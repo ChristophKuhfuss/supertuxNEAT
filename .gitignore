@@ -2,6 +2,7 @@
 build/
 build.*/
 supertux2
+*.o
 # Windows build files
 Debug/
 Release/

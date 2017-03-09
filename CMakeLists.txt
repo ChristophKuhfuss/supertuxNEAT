@@ -319,12 +319,9 @@ endif()
 
 INCLUDE(ConfigureChecks)
 
-## Also build external/accneat
-ExternalProject_Add(accneat
-  SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/accneat/"
-  CONFIGURE_COMMAND ${CMAKE_SOURCE_DIR}/external/accneat/configure
-  BUILD_COMMAND cd ${CMAKE_SOURCE_DIR}/external/accneat && make
-  INSTALL_COMMAND "")
+## Also build external/rtneat
+
+
 
 ## Also build external/squirrel
 
@@ -487,7 +484,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     #   -ansi
     # fails on clang:
     #   -Wlogical-op -Wstrict-null-sentinel
-    SET(SUPERTUX2_EXTRA_WARNING_FLAGS "-fdiagnostics-show-option -pedantic -Wno-long-long -Wcast-align -Wdisabled-optimization -Winit-self -Winvalid-pch -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wredundant-decls -Wstack-protector -Wformat=2 -Weffc++ -Wctor-dtor-privacy  -Wno-unused-parameter -Wshadow -Wnon-virtual-dtor -Wcast-qual")
+    SET(SUPERTUX2_EXTRA_WARNING_FLAGS "-fdiagnostics-show-option -Wno-long-long -Wcast-align -Wdisabled-optimization -Winit-self -Winvalid-pch -Wmissing-include-dirs -Wmissing-noreturn -Wpacked -Wredundant-decls -Wstack-protector -Wformat=2 -Weffc++ -Wctor-dtor-privacy  -Wno-unused-parameter -Wshadow -Wnon-virtual-dtor -Wcast-qual")
   ENDIF(WARNINGS)
 endif()
 
@@ -630,6 +627,7 @@ TARGET_LINK_LIBRARIES(supertux2_lib PUBLIC sexp)
 TARGET_LINK_LIBRARIES(supertux2_lib PUBLIC ${OPENAL_LIBRARY})
 TARGET_LINK_LIBRARIES(supertux2_lib PUBLIC ${OGGVORBIS_LIBRARIES})
 TARGET_LINK_LIBRARIES(supertux2_lib PUBLIC ${Boost_LIBRARIES})
+
 IF(USE_SYSTEM_PHYSFS)
     TARGET_LINK_LIBRARIES(supertux2_lib PUBLIC ${PHYSFS_LIBRARY})
 ELSE()
