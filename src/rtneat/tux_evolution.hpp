@@ -5,9 +5,11 @@
 #define HEADER_TUX_EVOLUTION
 
 #include "population.h"
-#include "genome.h"
+#include "organism.h"
+#include <vector>
 
 using namespace NEAT;
+using namespace std;
 
 struct NeatInputs  {
   double sensors[10][10];
@@ -28,22 +30,25 @@ private:
   double top_fitness;
   int gens;
   int num_gens;
-  Genome* cur_genome;
-  
+  vector<Organism*> remaining_organisms;
+  Organism* cur_org;
+  NeatInputs cur_inputs;
+  NeatOutputs cur_outputs;
 public:
   TuxEvolution();
   TuxEvolution(char* paramfile);
   ~TuxEvolution();
-  void tux_epoch();
   void on_tux_death(double progress, double score);
-  void accept_inputs(NeatInputs inputs);
-  NeatOutputs get_outputs();
+  void accept_inputs();
+  NeatOutputs* get_outputs();
   
   double get_top_fitness();
   int get_generation_number();
   
 private:
-  void tux_evaluate();
+  vector<Organism*>::iterator it;
+  bool tux_epoch();
+  double tux_evaluate(double progress, double score);
   void propagate_inputs(NeatInputs inputs);
 };
 
