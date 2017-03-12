@@ -38,7 +38,7 @@ public:
   TuxEvolution();
   TuxEvolution(char* paramfile);
   ~TuxEvolution();
-  void on_tux_death(double progress, double score);
+  bool on_tux_death(double progress, double score);
   void accept_inputs();
   NeatOutputs* get_outputs();
   

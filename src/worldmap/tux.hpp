@@ -19,6 +19,7 @@
 #define HEADER_SUPERTUX_WORLDMAP_TUX_HPP
 
 #include "worldmap/worldmap.hpp"
+#include "supertux/player_status.hpp"
 
 class Sprite;
 

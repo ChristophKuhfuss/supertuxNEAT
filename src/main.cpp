@@ -15,7 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "SDL.h"
-#include "rtneat/nnode.h"
 #include "supertux/main.hpp"
 #include "object/player.hpp"
 #include <iostream>
@@ -24,6 +23,7 @@ using namespace NEAT;
 
 int main(int argc, char** argv)
 {
+  std::cout << g->GetFitness() << std::endl;
   return Main().run(argc, argv);
 }
 

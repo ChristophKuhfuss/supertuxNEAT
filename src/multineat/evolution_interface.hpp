@@ -5,11 +5,15 @@
 #ifndef HEADER_EVOLUTION_INTERFACE
 #define HEADER_EVOLUTION_INTERFACE
 
-#include "TuxEvolution.hpp"
+#include "tux_evolution.hpp"
 #include "worldmap/worldmap.hpp"
 #include "supertux/game_object.hpp"
+#include "worldmap/tux.hpp"
 
 using namespace NEAT;
+using namespace worldmap;
+
+
 
 class EvolutionInterface 
 {

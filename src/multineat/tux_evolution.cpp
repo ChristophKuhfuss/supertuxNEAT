@@ -1,4 +1,4 @@
-#include "tux_evolution.hpp"
+/*#include "tux_evolution.hpp"
 #include <boost/concept_check.hpp>
 #include <vector>
 
@@ -38,6 +38,7 @@ void TuxEvolution::propagate_inputs()
 
 NeatOutputs* TuxEvolution::get_outputs()
 {
+  Network* net = cur_org->net;
   propagate_inputs();
   std::vector<NNode*> net_outputs = net->outputs; 
   cur_outputs.direction_up = (*(net_outputs.at(0)))->activation;
@@ -65,7 +66,7 @@ bool TuxEvolution::on_tux_death(double progress, double score)
 {
   cur_org->fitness=tux_evaluate(progress, score);
   if (it != pop->organisms.end()) {
-    cur_org = ++it;
+    cur_org = *(++it);
     return true;
   } else {
     return tux_epoch();
@@ -90,3 +91,4 @@ int TuxEvolution::get_generation_number()
 
 
 
+*/
