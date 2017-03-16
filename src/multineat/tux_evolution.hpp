@@ -4,8 +4,9 @@
 #ifndef HEADER_TUX_EVOLUTION
 #define HEADER_TUX_EVOLUTION
 
-#include "population.h"
-#include "organism.h"
+#include "multineat/Population.h"
+#include "multineat/Genome.h"
+#include "multineat/NeuralNetwork.h"
 #include <vector>
 
 using namespace NEAT;
@@ -30,10 +31,13 @@ private:
   double top_fitness;
   int gens;
   int num_gens;
-  vector<Organism*> remaining_organisms;
-  Organism* cur_org;
+  vector<Genome*> remaining_genomes;
+  Genome* cur_genome;
+  NeuralNetwork* cur_network;
   NeatInputs cur_inputs;
   NeatOutputs cur_outputs;
+  vector<Genome*>::iterator it;
+
 public:
   TuxEvolution();
   TuxEvolution(char* paramfile);
@@ -46,10 +50,11 @@ public:
   int get_generation_number();
   
 private:
-  vector<Organism*>::iterator it;
   bool tux_epoch();
   double tux_evaluate(double progress, double score);
   void propagate_inputs(NeatInputs inputs);
+  bool advance_genome();
+  void refresh_genome_list();
 };
 
 #endif /* HEADER_TUX_EVOLUTION */
