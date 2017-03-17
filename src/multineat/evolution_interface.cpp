@@ -10,6 +10,7 @@ EvolutionInterface::EvolutionInterface(GameSession* session){
 }
 
 void EvolutionInterface::update(float elapsed_time) {
+  //TODO Add movement timeout and everything else
   if (!check_tux_death()) {
     neat->accept_inputs(generate_inputs());
     outputs = neat->get_outputs();
