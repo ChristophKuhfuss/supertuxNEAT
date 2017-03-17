@@ -19,34 +19,38 @@ TuxEvolution::TuxEvolution(char* paramfile)
 
 TuxEvolution::~TuxEvolution()
 {
-  delete pop;
-  delete remaining_organisms;
+  //delete pop;
+  //delete remaining_genomes;
 }
 
 
-void TuxEvolution::accept_inputs(NeatInputs inputs)
+void TuxEvolution::accept_inputs(NeatInputs* inputs)
 {
+  delete cur_inputs;
   this->cur_inputs = inputs;
 }
 
 void TuxEvolution::propagate_inputs()
 {
-  NeuralNetwork* net = cur_org->net;
-  net->load_sensors(cur_inputs->sensors);
-  net->activate();
+  cur_network->Flush();
+  cur_network->Input(cur_inputs->sensors);
+  
+  // Activate depth times to ensure full input propagation
+  for (int i = 0; i < cur_genome->GetDepth(); i++) {
+    cur_network->Activate();
+  }
 }
 
 NeatOutputs* TuxEvolution::get_outputs()
 {
-  NeuralNetwork* net = cur_org->net;
   propagate_inputs();
-  std::vector<NNode*> net_outputs = net->outputs; 
-  cur_outputs.direction_up = (*(net_outputs.at(0)))->activation;
-  cur_outputs.direction_down = (*(net_outputs.at(1)))->activation;
-  cur_outputs.direction_left = (*(net_outputs.at(2)))->activation;
-  cur_outputs.direction_right = (*(net_outputs.at(3)))->activation;
-  cur_outputs.jump = (*(net_outputs.at(4)))->activation;
-  cur_outputs.action = (*(net_outputs.at(5)))->activation;
+  std::vector<double> net_outputs = cur_network->Output(); 
+  cur_outputs->direction_up = net_outputs.at(0);
+  cur_outputs->direction_down = net_outputs.at(1);
+  cur_outputs->direction_left = net_outputs.at(2);
+  cur_outputs->direction_right = net_outputs.at(3);
+  cur_outputs->jump = net_outputs.at(4);
+  cur_outputs->action = net_outputs.at(5);
   
   return cur_outputs;
 }
@@ -56,7 +60,8 @@ bool TuxEvolution::tux_epoch()
   if (gens < num_gens) {
     cur_genome = 0;
     pop->Epoch();
-    it = advance_genome();
+    refresh_genome_list();
+    it = remaining_genomes.begin();
     return true;
   } else {
     return false;

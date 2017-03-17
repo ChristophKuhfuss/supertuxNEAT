@@ -13,7 +13,7 @@ using namespace NEAT;
 using namespace std;
 
 struct NeatInputs  {
-  double sensors[10][10];
+  vector<double> sensors;
 };
 
 struct NeatOutputs {
@@ -34,8 +34,8 @@ private:
   vector<Genome*> remaining_genomes;
   Genome* cur_genome;
   NeuralNetwork* cur_network;
-  NeatInputs cur_inputs;
-  NeatOutputs cur_outputs;
+  NeatInputs* cur_inputs;
+  NeatOutputs* cur_outputs;
   vector<Genome*>::iterator it;
 
 public:
@@ -43,7 +43,7 @@ public:
   TuxEvolution(char* paramfile);
   ~TuxEvolution();
   bool on_tux_death(double progress, double score);
-  void accept_inputs();
+  void accept_inputs(NeatInputs* inputs);
   NeatOutputs* get_outputs();
   
   double get_top_fitness();
@@ -52,7 +52,7 @@ public:
 private:
   bool tux_epoch();
   double tux_evaluate(double progress, double score);
-  void propagate_inputs(NeatInputs inputs);
+  void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();
 };
