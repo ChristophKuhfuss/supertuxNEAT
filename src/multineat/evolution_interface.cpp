@@ -1,6 +1,7 @@
 #include "evolution_interface.hpp"
 
-EvolutionInterface::EvolutionInterface(GameSession* session){
+EvolutionInterface::EvolutionInterface(GameSession* session)
+{
   this->cur_session = session; 
   this->cur_sector = session->get_current_sector();
   this->tux = cur_sector->player;
@@ -9,16 +10,21 @@ EvolutionInterface::EvolutionInterface(GameSession* session){
   neat = new TuxEvolution();
 }
 
-void EvolutionInterface::update(float elapsed_time) {
-  //TODO Add movement timeout and everything else
+void EvolutionInterface::update(float elapsed_time) 
+{
   if (!check_tux_death()) {
-    neat->accept_inputs(generate_inputs());
-    outputs = neat->get_outputs();
-    send_outputs();
+    update_idle(elapsed_time);
+    if (idle < TIMEOUT) {
+      neat->accept_inputs(generate_inputs());
+      outputs = neat->get_outputs();
+      send_outputs();
+    } else {
+      timeout();
+    }
   }
 }
 
-void EvolutionInterface::draw(DrawingContext& context)
+void EvolutionInterface::draw(DrawingContext& context) 
 {
   //TODO Draw evolution information to screen
 }
@@ -29,7 +35,8 @@ void EvolutionInterface::send_inputs(NeatInputs* inputs)
 }
 
 //Maps outputs to controller buttons
-void EvolutionInterface::send_outputs() {
+void EvolutionInterface::send_outputs() 
+{
   
   if (outputs->direction_up >= SEND_THRESHOLD) {
     controller->press(Controller::UP);
@@ -58,9 +65,23 @@ void EvolutionInterface::send_outputs() {
 
 bool EvolutionInterface::check_tux_death()
 {
-  //TODO If tux died or timeout, call on_tux_death() on the TuxEvolution object
+  //TODO If tux died call on_tux_death() on the TuxEvolution object
   return false;
 }
 
+void EvolutionInterface::update_idle(float elapsed_time) 
+{
+  if (*last_known_playerpos != tux->get_pos()) {
+      idle = 0;
+      last_known_playerpos = &tux->get_pos();
+  } else {
+    idle += elapsed_time;
+  }
+}
+
+void EvolutionInterface::timeout() 
+{
+  //TODO Reset level and advance to next genome
+}
 
 

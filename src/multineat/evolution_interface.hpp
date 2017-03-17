@@ -29,6 +29,8 @@ private:
   double* sensorValues;
   NeatOutputs* outputs;
   TuxEvolution* neat;
+  const Vector* last_known_playerpos;
+  float idle;
 public:
   EvolutionInterface(GameSession* session);
   ~EvolutionInterface();
@@ -39,6 +41,8 @@ private:
   NeatInputs* generate_inputs();
   void send_outputs();
   bool check_tux_death();
+  void update_idle(float elapsed_time);
+  void timeout();
 };
 
 #endif /* HEADER_EVOLUTION_INTERFACE */
