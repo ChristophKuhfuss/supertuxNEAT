@@ -6,29 +6,28 @@
 #define HEADER_EVOLUTION_INTERFACE
 
 #include "tux_evolution.hpp"
-#include "worldmap/worldmap.hpp"
 #include "supertux/game_object.hpp"
-#include "worldmap/tux.hpp"
+#include "supertux/sector.hpp"
+#include "supertux/game_session.hpp"
+#include "object/player.hpp"
 
 using namespace NEAT;
-using namespace worldmap;
 
 
-//TODO Change WorldMap references to Level references
-//TODO Change Tux references to Player references
 class EvolutionInterface 
 {
 public:
   static const int SENSOR_GRID_SIZE = 10;
   static constexpr float TIMEOUT = 2000;
 private:
-  WorldMap* worldMap;
-  Tux* tux;
+  GameSession* cur_session;
+  Sector* cur_sector;
+  Player* tux;
   double* sensorValues;
   NeatOutputs* outputs;
   TuxEvolution* neat;
 public:
-  EvolutionInterface(WorldMap* map);
+  EvolutionInterface(GameSession* session);
   ~EvolutionInterface();
   void update(float elapsed_time);
   void draw(DrawingContext& context);

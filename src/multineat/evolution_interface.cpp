@@ -1,8 +1,9 @@
 #include "evolution_interface.hpp"
 
-EvolutionInterface::EvolutionInterface(WorldMap* map){
-  this->worldMap = map; 
-  this->tux = worldMap->get_tux();
+EvolutionInterface::EvolutionInterface(GameSession* session){
+  this->cur_session = session; 
+  this->cur_sector = session->get_current_sector();
+  this->tux = cur_sector->player;
   sensorValues = new double[SENSOR_GRID_SIZE * SENSOR_GRID_SIZE];
   outputs = new NeatOutputs();
   neat = new TuxEvolution();
@@ -14,7 +15,6 @@ void EvolutionInterface::update(float elapsed_time) {
     outputs = neat->get_outputs();
     send_outputs();
   }
-  
 }
 
 void EvolutionInterface::draw(DrawingContext& context)

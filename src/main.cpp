@@ -16,14 +16,9 @@
 
 #include "SDL.h"
 #include "supertux/main.hpp"
-#include "object/player.hpp"
-#include <iostream>
-
-using namespace NEAT;
 
 int main(int argc, char** argv)
 {
-  std::cout << g->GetFitness() << std::endl;
   return Main().run(argc, argv);
 }
 
