@@ -9,6 +9,7 @@
 #include "supertux/game_object.hpp"
 #include "supertux/sector.hpp"
 #include "supertux/game_session.hpp"
+#include "control/codecontroller.hpp"
 #include "object/player.hpp"
 
 using namespace NEAT;
@@ -19,10 +20,12 @@ class EvolutionInterface
 public:
   static const int SENSOR_GRID_SIZE = 10;
   static constexpr float TIMEOUT = 2000;
+  static constexpr float SEND_THRESHOLD = 0.9;
 private:
   GameSession* cur_session;
   Sector* cur_sector;
   Player* tux;
+  CodeController* controller;
   double* sensorValues;
   NeatOutputs* outputs;
   TuxEvolution* neat;

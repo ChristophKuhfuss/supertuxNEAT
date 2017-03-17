@@ -27,9 +27,32 @@ void EvolutionInterface::send_inputs(NeatInputs* inputs)
   neat->accept_inputs(inputs);
 }
 
+//Maps outputs to controller buttons
 void EvolutionInterface::send_outputs() {
   
-  //TODO Send outputs to tux
+  if (outputs->direction_up >= SEND_THRESHOLD) {
+    controller->press(Controller::UP);
+  }
+  
+  if (outputs->direction_down >= SEND_THRESHOLD) {
+    controller->press(Controller::DOWN);
+  }
+  
+  if (outputs->direction_left >= SEND_THRESHOLD) {
+    controller->press(Controller::LEFT);
+  }
+  
+  if (outputs->direction_right >= SEND_THRESHOLD) {
+    controller->press(Controller::RIGHT);
+  }
+  
+  if (outputs->action >= SEND_THRESHOLD) {
+    controller->press(Controller::ACTION);
+  }
+  
+  if (outputs->action >= SEND_THRESHOLD) {
+    controller->press(Controller::JUMP);
+  }
 }
 
 bool EvolutionInterface::check_tux_death()

@@ -51,7 +51,6 @@ NeatOutputs* TuxEvolution::get_outputs()
   cur_outputs->direction_right = net_outputs.at(3);
   cur_outputs->jump = net_outputs.at(4);
   cur_outputs->action = net_outputs.at(5);
-  
   return cur_outputs;
 }
 
