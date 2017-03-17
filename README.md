@@ -1,3 +1,6 @@
+# SuperTux + NEAT
+Creating a neural agent for the SuperTux Jump'n'Run game using the NEAT algorithm as a project for my master thesis. To accomplish this, the MultiNEAT implementation by Peter Chervenski is used (https://github.com/peter-ch/MultiNEAT/tree/master/src).
+
 # SuperTux
 
 [![Build Status](https://travis-ci.org/SuperTux/supertux.svg?branch=master)](https://travis-ci.org/SuperTux/supertux)
