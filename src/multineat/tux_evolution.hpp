@@ -40,9 +40,8 @@ private:
 
 public:
   TuxEvolution();
-  TuxEvolution(char* paramfile);
   ~TuxEvolution();
-  bool on_tux_death(double progress, double score);
+  bool on_tux_death(float progress, int coins);
   void accept_inputs(NeatInputs* inputs);
   NeatOutputs* get_outputs();
   
@@ -51,7 +50,7 @@ public:
   
 private:
   bool tux_epoch();
-  double tux_evaluate(double progress, double score);
+  double tux_evaluate(float progress, int coins);
   void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();

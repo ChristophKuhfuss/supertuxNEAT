@@ -21,6 +21,11 @@ void EvolutionInterface::update(float elapsed_time)
     } else {
       timeout();
     }
+  } else {
+    float progress = tux->get_pos().x;
+    int coins = tux->get_coins();
+    
+    neat->on_tux_death(progress, coins);
   }
 }
 

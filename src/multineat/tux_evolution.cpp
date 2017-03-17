@@ -12,11 +12,6 @@ TuxEvolution::TuxEvolution()
   cur_outputs = new NeatOutputs();
 }
 
-TuxEvolution::TuxEvolution(char* paramfile)
-{
-
-}
-
 TuxEvolution::~TuxEvolution()
 {
   //delete pop;
@@ -30,6 +25,7 @@ void TuxEvolution::accept_inputs(NeatInputs* inputs)
   this->cur_inputs = inputs;
 }
 
+// Clears the network and gives it the current inputs
 void TuxEvolution::propagate_inputs()
 {
   cur_network->Flush();
@@ -54,6 +50,7 @@ NeatOutputs* TuxEvolution::get_outputs()
   return cur_outputs;
 }
 
+// Advances the population to the next generation
 bool TuxEvolution::tux_epoch()
 {
   if (gens < num_gens) {
@@ -67,22 +64,23 @@ bool TuxEvolution::tux_epoch()
   }
 }
 
-bool TuxEvolution::on_tux_death(double progress, double score)
+// Calculates fitness of current genome and marks the evaluated flag
+// Returns the result of advance_genome(), which is false if the simulation finished
+bool TuxEvolution::on_tux_death(float progress, int coins)
 {
   //Only set fitness - adjfitness is set by species on pop.Epoch()
-  cur_genome->SetFitness(tux_evaluate(progress, score));
+  cur_genome->SetFitness(tux_evaluate(progress, coins));
   cur_genome->SetEvaluated();
   return advance_genome();
 }
 
-double TuxEvolution::tux_evaluate(double progress, double score)
+double TuxEvolution::tux_evaluate(float progress, int coins)
 {
-  // TODO: this is a dummy
-  return progress + score;
+  return progress + coins * 100;
 }
 
-//Advances the current genome to the next one
-//Returns false if all generations finished
+// Advances the current genome to the next one
+// Returns false if all generations finished
 bool TuxEvolution::advance_genome()
 {
   if (it != remaining_genomes.end()) {
