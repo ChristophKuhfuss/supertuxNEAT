@@ -53,7 +53,7 @@ NeatOutputs* TuxEvolution::get_outputs()
 // Advances the population to the next generation
 bool TuxEvolution::tux_epoch()
 {
-  if (gens < num_gens) {
+  if (gens < max_gens) {
     cur_genome = 0;
     pop->Epoch();
     refresh_genome_list();

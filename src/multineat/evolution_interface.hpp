@@ -6,6 +6,7 @@
 #define HEADER_EVOLUTION_INTERFACE
 
 #include "tux_evolution.hpp"
+#include "sensor.hpp"
 #include "supertux/game_object.hpp"
 #include "supertux/sector.hpp"
 #include "supertux/game_session.hpp"
@@ -27,6 +28,7 @@ private:
   Player* tux;
   CodeController* controller;
   double* sensorValues;
+  vector<Sensor> sensors;
   NeatOutputs* outputs;
   TuxEvolution* neat;
   const Vector* last_known_playerpos;

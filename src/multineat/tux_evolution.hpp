@@ -30,7 +30,7 @@ private:
   Population* pop;
   double top_fitness;
   int gens;
-  int num_gens;
+  int max_gens;
   vector<Genome*> remaining_genomes;
   Genome* cur_genome;
   NeuralNetwork* cur_network;
