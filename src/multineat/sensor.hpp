@@ -20,7 +20,7 @@ public:
   void draw(DrawingContext& context);
   HitResponse collision(GameObject& other, const CollisionHit& hit);
   double getValue();
-}
+};
 
 #endif /* HEADER_SENSOR */
 /* EOF */

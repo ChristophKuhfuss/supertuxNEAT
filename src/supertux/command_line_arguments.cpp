@@ -368,6 +368,18 @@ CommandLineArguments::parse_args(int argc, char** argv)
         edit_level = argv[++i];
       }
     }
+    else if (arg == "--neat")
+    {
+      m_action = START_EVOLUTION;
+      
+      if (i + 1 < argc && argv[i + 1][0] != '-') {
+	start_level = argv[++i];
+      }
+      else
+      {
+	start_level = "../data/levels/world1/01 - Welcome to Antarctica.stl";
+      } 
+    }
     else if (arg[0] != '-')
     {
       start_level = arg;

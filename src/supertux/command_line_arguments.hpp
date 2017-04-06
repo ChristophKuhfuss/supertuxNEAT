@@ -35,7 +35,8 @@ public:
     NO_ACTION,
     PRINT_VERSION,
     PRINT_HELP,
-    PRINT_DATADIR
+    PRINT_DATADIR,
+    START_EVOLUTION
   };
 
 private:

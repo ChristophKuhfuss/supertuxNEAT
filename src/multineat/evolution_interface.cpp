@@ -5,7 +5,7 @@ EvolutionInterface::EvolutionInterface(GameSession* session)
   this->cur_session = session; 
   this->cur_sector = session->get_current_sector();
   this->tux = cur_sector->player;
-  sensorValues = new double[SENSOR_GRID_SIZE * SENSOR_GRID_SIZE];
+  sensorValues = new double[TuxEvolution::SENSOR_GRID_SIZE * TuxEvolution::SENSOR_GRID_SIZE];
   outputs = new NeatOutputs();
   neat = new TuxEvolution();
 }

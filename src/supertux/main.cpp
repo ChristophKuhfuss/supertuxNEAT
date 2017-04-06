@@ -448,6 +448,14 @@ Main::launch_game()
   screen_manager.run(context);
 }
 
+void
+Main::launch_evolution()
+{
+  std::cout << "SuperTux + NEAT interface and experiment code by Christoph Kuhfuss 2017" << std::endl;
+  std::cout << "Using the original SuperTux source and the MultiNEAT framework by Peter Chervenski (https://github.com/peter-ch/MultiNEAT)" << std::endl;
+  launch_game();
+}
+
 int
 Main::run(int argc, char** argv)
 {
@@ -499,6 +507,10 @@ Main::run(int argc, char** argv)
       case CommandLineArguments::PRINT_DATADIR:
         args.print_datadir();
         return 0;
+	
+      case CommandLineArguments::START_EVOLUTION:
+	launch_evolution();
+	break;
 
       default:
         launch_game();

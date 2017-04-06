@@ -24,6 +24,7 @@ private:
   void init_video();
 
   void launch_game();
+  void launch_evolution();
 
 public:
   /** We call it run() instead of main() as main collides with

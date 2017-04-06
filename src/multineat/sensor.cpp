@@ -1,7 +1,7 @@
 #include "sensor.hpp"
 
 Sensor::Sensor(Player* tux, int offsetX, int offsetY) {
-  this->tux = tux;
+  this->Tux = tux;
   this->offsetX = offsetX;
   this->offsetY = offsetY;
   this->value = 0;

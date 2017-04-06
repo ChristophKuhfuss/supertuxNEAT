@@ -26,8 +26,13 @@ struct NeatOutputs {
 };
 
 class TuxEvolution {
+public:
+  static const int SENSOR_GRID_SIZE = 10;
+
 private:
   Population* pop;
+  Parameters params;
+  Genome start_genome;
   double top_fitness;
   int gens;
   int max_gens;

@@ -19,7 +19,6 @@ using namespace NEAT;
 class EvolutionInterface 
 {
 public:
-  static const int SENSOR_GRID_SIZE = 10;
   static constexpr float TIMEOUT = 2000;
   static constexpr float SEND_THRESHOLD = 0.9;
 private:
