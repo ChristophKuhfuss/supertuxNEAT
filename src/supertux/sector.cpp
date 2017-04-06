@@ -54,6 +54,7 @@
 #include "util/reader_collection.hpp"
 #include "util/reader_mapping.hpp"
 #include "util/writer.hpp"
+#include "supertux/gameconfig.hpp"
 
 Sector* Sector::_current = 0;
 
@@ -94,6 +95,10 @@ Sector::Sector(Level* parent) :
   add_object(std::make_shared<Player>(player_status, "Tux"));
   add_object(std::make_shared<DisplayEffect>("Effect"));
   add_object(std::make_shared<TextObject>("Text"));
+  
+  if (Config::neat_activated) {
+    //TODO Create NEAT stuff
+  }
 
   SoundManager::current()->preload("sounds/shoot.wav");
 

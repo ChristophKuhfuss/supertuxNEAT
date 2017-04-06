@@ -411,13 +411,16 @@ GameSession::setup()
   currentsector->play_music(LEVEL_MUSIC);
 
   int total_stats_to_be_collected = level->stats.total_coins + level->stats.total_badguys + level->stats.total_secrets;
-  if ((!levelintro_shown) && (total_stats_to_be_collected > 0)) {
-    levelintro_shown = true;
-    active = false;
-    ScreenManager::current()->push_screen(std::unique_ptr<Screen>(new LevelIntro(level.get(), best_level_statistics, m_savegame.get_player_status())));
+  
+  if (!Config::neat_activated) {
+    if ((!levelintro_shown) && (total_stats_to_be_collected > 0)) {
+      levelintro_shown = true;
+      active = false;
+      ScreenManager::current()->push_screen(std::unique_ptr<Screen>(new LevelIntro(level.get(), best_level_statistics, m_savegame.get_player_status())));
+    }
+    ScreenManager::current()->set_screen_fade(std::unique_ptr<ScreenFade>(new FadeIn(1)));
+    end_seq_started = false;
   }
-  ScreenManager::current()->set_screen_fade(std::unique_ptr<ScreenFade>(new FadeIn(1)));
-  end_seq_started = false;
 }
 
 void

@@ -27,6 +27,8 @@
 #include "util/log.hpp"
 #include "supertux/globals.hpp"
 
+bool Config::neat_activated = false;
+
 Config::Config() :
   profile(1),
   fullscreen_size(0, 0),

@@ -59,6 +59,10 @@ public:
   bool show_player_pos;
   bool sound_enabled;
   bool music_enabled;
+  
+  /** central neat control variable 
+      static so it's accessible from anywhere*/
+  static bool neat_activated;
 
   /** initial random seed.  0 ==> set from time() */
   int random_seed;

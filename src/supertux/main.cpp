@@ -453,6 +453,7 @@ Main::launch_evolution()
 {
   std::cout << "SuperTux + NEAT interface and experiment code by Christoph Kuhfuss 2017" << std::endl;
   std::cout << "Using the original SuperTux source and the MultiNEAT framework by Peter Chervenski (https://github.com/peter-ch/MultiNEAT)" << std::endl;
+  g_config->neat_activated = true;
   launch_game();
 }
 
