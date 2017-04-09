@@ -48,6 +48,7 @@
 #include "util/file_system.hpp"
 #include "util/gettext.hpp"
 #include "worldmap/worldmap.hpp"
+#include <multineat/tux_evolution.hpp>
 
 #ifdef WIN32
 #  define snprintf _snprintf
@@ -105,6 +106,12 @@ GameSession::reset_level()
 int
 GameSession::restart_level(bool after_death)
 {
+  if (Config::neat_activated) {
+    if (after_death) {
+      evo_interface->on_tux_death(currentsector->player->get_pos().x, currentsector->player->get_status()->coins);
+    }
+  }
+  
     PlayerStatus* currentStatus = m_savegame.get_player_status();
     coins_at_start = currentStatus->coins;
     bonus_at_start = currentStatus->bonus;
@@ -402,6 +409,9 @@ GameSession::draw_pause(DrawingContext& context)
 void
 GameSession::setup()
 {
+  if (Config::neat_activated) {
+    evo_interface = std::make_shared<EvolutionInterface>(this);
+  }
   if (currentsector == NULL)
     return;
 
@@ -420,6 +430,12 @@ GameSession::setup()
     }
     ScreenManager::current()->set_screen_fade(std::unique_ptr<ScreenFade>(new FadeIn(1)));
     end_seq_started = false;
+  } else {
+//    currentsector->add_object(evo_interface);
+    
+    for (unsigned int i = 0; i < TuxEvolution::SENSOR_GRID_SIZE * TuxEvolution::SENSOR_GRID_SIZE; i++) {
+      
+    }
   }
 }
 

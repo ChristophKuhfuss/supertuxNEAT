@@ -27,6 +27,8 @@
 #include "supertux/sequence.hpp"
 #include "supertux/player_status.hpp"
 #include "util/currenton.hpp"
+#include "supertux/game_object_ptr.hpp"
+#include "multineat/evolution_interface.hpp"
 
 class CodeController;
 class DrawingContext;
@@ -34,7 +36,7 @@ class Level;
 class Sector;
 class Statistics;
 class Savegame;
-
+class EvolutionInterface;
 /**
  * Screen that runs a Level, where Players run and jump through Sectors.
  */
@@ -157,6 +159,8 @@ private:
   bool active; /** Game active? **/
 
   bool end_seq_started;
+  
+  std::shared_ptr<EvolutionInterface> evo_interface;
 
 private:
   GameSession(const GameSession&);

@@ -28,32 +28,34 @@ struct NeatOutputs {
 class TuxEvolution {
 public:
   static const int SENSOR_GRID_SIZE = 10;
+  static const bool debug = true;
 
 private:
-  Population* pop;
   Parameters params;
   Genome start_genome;
+  Population pop;
   double top_fitness;
   int gens;
   int max_gens;
-  vector<Genome*> remaining_genomes;
-  Genome* cur_genome;
-  NeuralNetwork* cur_network;
-  NeatInputs* cur_inputs;
-  NeatOutputs* cur_outputs;
-  vector<Genome*>::iterator it;
+  vector<Genome> remaining_genomes;
+  Genome cur_genome;
+  NeuralNetwork cur_network;
+  NeatInputs cur_inputs;
+  NeatOutputs cur_outputs;
+  vector<Genome>::iterator it;
 
 public:
   TuxEvolution();
   ~TuxEvolution();
   bool on_tux_death(float progress, int coins);
-  void accept_inputs(NeatInputs* inputs);
-  NeatOutputs* get_outputs();
+  void accept_inputs(NeatInputs inputs);
+  NeatOutputs get_outputs();
   
   double get_top_fitness();
   int get_generation_number();
   
 private:
+  static Parameters init_params();
   bool tux_epoch();
   double tux_evaluate(float progress, int coins);
   void propagate_inputs();

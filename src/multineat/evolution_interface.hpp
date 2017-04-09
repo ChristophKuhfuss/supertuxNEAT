@@ -15,8 +15,9 @@
 
 using namespace NEAT;
 
+class GameSession;
 
-class EvolutionInterface 
+class EvolutionInterface : public GameObject
 {
 public:
   static constexpr float TIMEOUT = 2000;
@@ -28,20 +29,23 @@ private:
   CodeController* controller;
   double* sensorValues;
   vector<Sensor> sensors;
-  NeatOutputs* outputs;
-  TuxEvolution* neat;
-  const Vector* last_known_playerpos;
+  NeatOutputs outputs;
+  TuxEvolution neat;
+  Vector last_known_playerpos;
   float idle;
 public:
   EvolutionInterface(GameSession* session);
   ~EvolutionInterface();
   void update(float elapsed_time);
   void draw(DrawingContext& context);
+  void on_tux_death(float progress, int coins);
+  void save(Writer& writer);
+  ObjectSettings get_settings();
+  void add_sensor(Sensor s);
 private:
-  void send_inputs(NeatInputs* inputs);
-  NeatInputs* generate_inputs();
+  void send_inputs(NeatInputs inputs);
+  NeatInputs generate_inputs();
   void send_outputs();
-  bool check_tux_death();
   void update_idle(float elapsed_time);
   void timeout();
 };
