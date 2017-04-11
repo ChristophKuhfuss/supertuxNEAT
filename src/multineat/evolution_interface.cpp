@@ -2,19 +2,24 @@
 
 EvolutionInterface::EvolutionInterface(GameSession* session) :
 cur_session(session),
-cur_sector(cur_session->get_current_sector()),
-tux(cur_sector->player),
+/*cur_sector(cur_session->get_current_sector()),
+tux(cur_sector->player),*/
 sensorValues(new double[TuxEvolution::SENSOR_GRID_SIZE * TuxEvolution::SENSOR_GRID_SIZE]),
 neat()
 {
-  if (TuxEvolution::debug) {
-    std::cout << "Created EvolutionInterface object" << std::endl;
-  }
 }
 
 EvolutionInterface::~EvolutionInterface()
 {
   delete[] sensorValues;
+}
+
+void EvolutionInterface::init()
+{
+  if (!initialized) {
+    cur_sector = cur_session->get_current_sector();
+    tux = cur_sector->player;
+  }
 }
 
 
@@ -83,16 +88,16 @@ void EvolutionInterface::send_outputs()
   }
 }
 
-void EvolutionInterface::on_tux_death(float progress, int coins)
+void EvolutionInterface::on_tux_death()
 {
-  neat.on_tux_death(progress, coins);
+  if (!neat.on_tux_death(tux->get_pos().x, tux->get_coins())) {
+    cur_session->toggle_pause();
+  }
+  idle = 0;
 }
 
 void EvolutionInterface::update_idle(float elapsed_time) 
 {
-  if (TuxEvolution::debug) {
-    std::cout << "Updating idle time..." << std::endl;
-  }
   if (last_known_playerpos != tux->get_pos()) {
       idle = 0;
       last_known_playerpos = tux->get_pos();
@@ -107,6 +112,7 @@ void EvolutionInterface::timeout()
     std::cout << "Timeout occured!" << std::endl;
   }
   cur_session->restart_level(false);
+  on_tux_death();
 }
 
 void EvolutionInterface::add_sensor(Sensor s)

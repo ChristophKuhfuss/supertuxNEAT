@@ -61,6 +61,7 @@ private:
   void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();
+  void get_genome_from_iterator();
 };
 
 #endif /* HEADER_TUX_EVOLUTION */

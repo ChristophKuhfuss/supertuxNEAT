@@ -87,6 +87,10 @@ GameSession::GameSession(const std::string& levelfile_, Savegame& savegame, Stat
   active(false),
   end_seq_started(false)
 {
+  if (Config::neat_activated) {
+    evo_interface = std::make_shared<EvolutionInterface>(this);
+  }
+  
   if (restart_level() != 0)
     throw std::runtime_error ("Initializing the level failed.");
 }
@@ -108,7 +112,7 @@ GameSession::restart_level(bool after_death)
 {
   if (Config::neat_activated) {
     if (after_death) {
-      evo_interface->on_tux_death(currentsector->player->get_pos().x, currentsector->player->get_status()->coins);
+      evo_interface->on_tux_death();
     }
   }
   
@@ -180,6 +184,11 @@ GameSession::restart_level(bool after_death)
     record_demo(capture_file);
   }
 
+  if (Config::neat_activated) {
+    evo_interface->init();
+    currentsector->add_object(evo_interface);
+  }
+  
   return (0);
 }
 
@@ -409,9 +418,6 @@ GameSession::draw_pause(DrawingContext& context)
 void
 GameSession::setup()
 {
-  if (Config::neat_activated) {
-    evo_interface = std::make_shared<EvolutionInterface>(this);
-  }
   if (currentsector == NULL)
     return;
 
@@ -430,12 +436,6 @@ GameSession::setup()
     }
     ScreenManager::current()->set_screen_fade(std::unique_ptr<ScreenFade>(new FadeIn(1)));
     end_seq_started = false;
-  } else {
-//    currentsector->add_object(evo_interface);
-    
-    for (unsigned int i = 0; i < TuxEvolution::SENSOR_GRID_SIZE * TuxEvolution::SENSOR_GRID_SIZE; i++) {
-      
-    }
   }
 }
 

@@ -20,7 +20,7 @@ class GameSession;
 class EvolutionInterface : public GameObject
 {
 public:
-  static constexpr float TIMEOUT = 2000;
+  static constexpr float TIMEOUT = 1.0f;
   static constexpr float SEND_THRESHOLD = 0.9;
 private:
   GameSession* cur_session;
@@ -33,15 +33,17 @@ private:
   TuxEvolution neat;
   Vector last_known_playerpos;
   float idle;
+  bool initialized = false;
 public:
   EvolutionInterface(GameSession* session);
   ~EvolutionInterface();
   void update(float elapsed_time);
   void draw(DrawingContext& context);
-  void on_tux_death(float progress, int coins);
+  void on_tux_death();
   void save(Writer& writer);
   ObjectSettings get_settings();
   void add_sensor(Sensor s);
+  void init();
 private:
   void send_inputs(NeatInputs inputs);
   NeatInputs generate_inputs();

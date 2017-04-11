@@ -14,12 +14,10 @@ TuxEvolution::TuxEvolution() : params(init_params()),
   cur_inputs()
 {
   gens = 0;
-  max_gens = 10;
+  max_gens = 200;
   refresh_genome_list();
   it = remaining_genomes.begin();
-  if (debug) {
-    std::cout << "TuxEvolution object created" << std::endl;
-  }
+  get_genome_from_iterator();
 }
 
 TuxEvolution::~TuxEvolution()
@@ -100,7 +98,7 @@ bool TuxEvolution::advance_genome()
 {
   ++it;
   if (it != remaining_genomes.end()) {
-    cur_genome = *it;
+    get_genome_from_iterator();
     std::cout << "Continuing evolution with genome #" << cur_genome.GetID() << "." << std::endl;
     return true;
   } else {
@@ -139,3 +137,10 @@ int TuxEvolution::get_generation_number()
 {
   return gens;
 }
+
+void TuxEvolution::get_genome_from_iterator()
+{
+  cur_genome = *it;
+  cur_genome.BuildPhenotype(cur_network);
+}
+
