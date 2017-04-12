@@ -293,7 +293,7 @@ Player::update(float elapsed_time)
   }
   no_water = true;
 
-  if(dying && dying_timer.check()) {
+  if(dying && (dying_timer.check() || Config::neat_activated)) {
     Sector::current()->stop_looping_sounds();
     set_bonus(NO_BONUS, true);
     dead = true;
@@ -1499,12 +1499,13 @@ Player::kill(bool completely)
     physic.set_velocity(0, -700);
     set_bonus(NO_BONUS, true);
     dying = true;
-    dying_timer.start(3.0);
     set_group(COLGROUP_DISABLED);
 
-    // TODO: need nice way to handle players dying in co-op mode
-    Sector::current()->effect->fade_out(3.0);
-    SoundManager::current()->pause_music(3.0);
+    if (!Config::neat_activated) {
+      dying_timer.start(3.0);
+      Sector::current()->effect->fade_out(3.0);
+      SoundManager::current()->pause_music(3.0);
+    }
   }
 }
 

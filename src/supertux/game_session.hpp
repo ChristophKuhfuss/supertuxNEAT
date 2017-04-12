@@ -29,6 +29,8 @@
 #include "util/currenton.hpp"
 #include "supertux/game_object_ptr.hpp"
 #include "multineat/evolution_interface.hpp"
+#include "multineat/tux_evolution.hpp"
+#include "multineat/sensor.hpp"
 
 class CodeController;
 class DrawingContext;

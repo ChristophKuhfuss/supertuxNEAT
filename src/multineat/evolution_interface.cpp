@@ -2,8 +2,6 @@
 
 EvolutionInterface::EvolutionInterface(GameSession* session) :
 cur_session(session),
-/*cur_sector(cur_session->get_current_sector()),
-tux(cur_sector->player),*/
 sensorValues(new double[TuxEvolution::SENSOR_GRID_SIZE * TuxEvolution::SENSOR_GRID_SIZE]),
 neat()
 {
@@ -117,9 +115,6 @@ void EvolutionInterface::timeout()
 
 void EvolutionInterface::add_sensor(Sensor s)
 {
-  if (TuxEvolution::debug) {
-    std::cout << "Adding sensor..." << std::endl;
-  }
   sensors.push_back(s);
 }
 

@@ -20,7 +20,7 @@ class GameSession;
 class EvolutionInterface : public GameObject
 {
 public:
-  static constexpr float TIMEOUT = 1.0f;
+  static constexpr float TIMEOUT = 100.0f;
   static constexpr float SEND_THRESHOLD = 0.9;
 private:
   GameSession* cur_session;

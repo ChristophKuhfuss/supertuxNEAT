@@ -1,24 +1,49 @@
 #include "sensor.hpp"
+#include <object/brick.hpp>
 
-Sensor::Sensor(Player* tux, int offsetX, int offsetY) {
-  this->Tux = tux;
-  this->offsetX = offsetX;
-  this->offsetY = offsetY;
-  this->value = 0;
+Sensor::Sensor(Sector* sec, int offsetX, int offsetY) :
+sec(sec),
+tux(sec->player),
+sprite(SpriteManager::current()->create("images/objects/sensor/sensor.png")),
+offsetX(offsetX),
+offsetY(offsetY),
+value(0)
+{
 }
 
 void Sensor::update(float elapsed_time) {
-  //TODO Update position 
+  Rectf lookahead = tux->get_bbox();
+  lookahead.p2.x += offsetX - 10;
+  lookahead.p2.y += offsetY - 10;
+  lookahead.p1.x = lookahead.p2.x - 1;
+  lookahead.p1.y = lookahead.p2.y - 1;
+  
+  if (!sec->is_free_of_statics(lookahead)) { 			// Static obstacle
+    value = 1;
+    sprite->set_color(Color(0,0.8,0.2));
+  } else if (!sec->is_free_of_movingstatics(lookahead, tux)) {	// Second parameter is for ignoring tux
+    value = -1;
+    sprite->set_color(Color(0.8,0.2,0.2));
+  } else {							// Else: nothing we currently care for
+    value = 0;
+    sprite->set_color(Color(0,0,0));
+  }
 }
 
 void Sensor::draw(DrawingContext& context) {
-  //TODO Draw something so we can actually see the sensors
-}
-
-HitResponse Sensor::collision(GameObject& other, const CollisionHit& hit) {
-  return ABORT_MOVE; 
+  sprite->draw(context, Vector(tux->get_bbox().p2.x + offsetX - 10, tux->get_bbox().p2.y + offsetY - 10), 401);
 }
 
 double Sensor::getValue() {
   return value; 
+}
+
+ObjectSettings Sensor::get_settings()
+{
+  return GameObject::get_settings();
+}
+
+void Sensor::save(Writer& writer)
+{
+  GameObject::save(writer);
 }
