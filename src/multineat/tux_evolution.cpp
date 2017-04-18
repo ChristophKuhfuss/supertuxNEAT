@@ -6,7 +6,7 @@
 
 
 TuxEvolution::TuxEvolution() : params(init_params()),
-  start_genome(0, SENSOR_GRID_SIZE * SENSOR_GRID_SIZE, 0, 
+  start_genome(0, SENSOR_GRID_SIZE * SENSOR_GRID_SIZE + 1, 0, 
 	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 0, params),
   pop(start_genome, params, true, 1.0, (int) time(0)),
   top_fitness(0),
@@ -33,6 +33,8 @@ void TuxEvolution::accept_inputs(NeatInputs inputs)
 void TuxEvolution::propagate_inputs()
 {
   cur_network.Flush();
+  vector<double> inputs = vector<double>(cur_inputs.sensors);
+  inputs.push_back(1);
   cur_network.Input(cur_inputs.sensors);
   
   // Activate depth times to ensure full input propagation
@@ -123,7 +125,10 @@ void TuxEvolution::refresh_genome_list()
 Parameters TuxEvolution::init_params()
 {
   Parameters res;
-  res.PopulationSize = 2;
+  res.PopulationSize = 70;
+  res.RecurrentProb = 0.01;
+  res.MutateAddLinkProb = 0.05;
+  res.MutateAddNeuronProb = 0.03;
   return res;
 }
 
@@ -142,5 +147,6 @@ void TuxEvolution::get_genome_from_iterator()
 {
   cur_genome = *it;
   cur_genome.BuildPhenotype(cur_network);
+  cur_genome.CalculateDepth();
 }
 

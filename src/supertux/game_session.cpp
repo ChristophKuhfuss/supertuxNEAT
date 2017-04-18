@@ -194,7 +194,7 @@ GameSession::restart_level(bool after_death)
 	std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(currentsector, i * TuxEvolution::SENSOR_GRID_PADDING - middle, 
 	  j * TuxEvolution::SENSOR_GRID_PADDING - middle);
 	currentsector->add_object(sensor);
-	evo_interface->add_sensor(*sensor);
+	evo_interface->add_sensor(sensor);
       }
     }
   }

@@ -20,20 +20,23 @@ class GameSession;
 class EvolutionInterface : public GameObject
 {
 public:
-  static constexpr float TIMEOUT = 100.0f;
-  static constexpr float SEND_THRESHOLD = 0.9;
+  static constexpr float TIMEOUT = 1.0f;
+  static constexpr float FITNESS_TIMEOUT = 3.0f;
+  static constexpr float SEND_THRESHOLD = 0.6;
 private:
   GameSession* cur_session;
   Sector* cur_sector;
   Player* tux;
-  CodeController* controller;
+  std::unique_ptr<CodeController> controller;
   double* sensorValues;
-  vector<Sensor> sensors;
+  vector<std::shared_ptr<Sensor>> sensors;
   NeatOutputs outputs;
   TuxEvolution neat;
   Vector last_known_playerpos;
   float idle;
+  float fitness_idle;
   bool initialized = false;
+  float max_x;
 public:
   EvolutionInterface(GameSession* session);
   ~EvolutionInterface();
@@ -42,7 +45,7 @@ public:
   void on_tux_death();
   void save(Writer& writer);
   ObjectSettings get_settings();
-  void add_sensor(Sensor s);
+  void add_sensor(std::shared_ptr<Sensor> s);
   void init();
 private:
   void send_inputs(NeatInputs inputs);
