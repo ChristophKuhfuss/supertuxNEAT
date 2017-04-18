@@ -116,11 +116,23 @@ GameSession::restart_level(bool after_death)
     }
   }
   
-    PlayerStatus* currentStatus = m_savegame.get_player_status();
+  PlayerStatus* currentStatus = m_savegame.get_player_status();
+
+  if (!Config::neat_activated) {
     coins_at_start = currentStatus->coins;
     bonus_at_start = currentStatus->bonus;
     max_fire_bullets_at_start = currentStatus->max_fire_bullets;
     max_ice_bullets_at_start = currentStatus->max_ice_bullets;
+  } else {
+    coins_at_start = 100;
+    bonus_at_start = NO_BONUS;
+    max_fire_bullets_at_start = 0;
+    max_ice_bullets_at_start = 0;
+    currentStatus->coins = 100;
+    currentStatus->bonus = NO_BONUS;
+    currentStatus->max_fire_bullets = 0;
+    currentStatus->max_ice_bullets = 0;
+  }
 
   if (edit_mode) {
     force_ghost_mode();
