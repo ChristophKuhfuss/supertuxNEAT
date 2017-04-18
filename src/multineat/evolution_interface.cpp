@@ -129,6 +129,7 @@ void EvolutionInterface::on_tux_death()
   
   idle = 0;
   fitness_idle = 0;
+  max_x = 0;
 }
 
 void EvolutionInterface::update_idle(float elapsed_time) 
