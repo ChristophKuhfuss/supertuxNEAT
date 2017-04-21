@@ -119,8 +119,6 @@ void EvolutionInterface::send_outputs()
 
 void EvolutionInterface::on_tux_death()
 {
-  std::cout << "Sensor vector size: " << sensors.size() << std::endl;
-
   sensors.clear();
   
   if (!neat.on_tux_death(tux->get_pos().x, tux->get_coins())) {

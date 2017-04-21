@@ -27,8 +27,8 @@ struct NeatOutputs {
 
 class TuxEvolution {
 public:
-  static const int SENSOR_GRID_SIZE = 10;
-  static const int SENSOR_GRID_PADDING = 30;
+  static const int SENSOR_GRID_SIZE = 30;
+  static const int SENSOR_GRID_PADDING = 22;
   static const bool debug = false;
 
 private:
@@ -36,14 +36,15 @@ private:
   Genome start_genome;
   Population pop;
   double top_fitness;
+  int top_fitness_genome_id;
   int gens;
   int max_gens;
-  vector<Genome> remaining_genomes;
-  Genome cur_genome;
+  vector<Genome*> remaining_genomes;
+  Genome* cur_genome;
   NeuralNetwork cur_network;
   NeatInputs cur_inputs;
   NeatOutputs cur_outputs;
-  vector<Genome>::iterator it;
+  vector<Genome*>::iterator it;
 
 public:
   TuxEvolution();
@@ -63,6 +64,7 @@ private:
   bool advance_genome();
   void refresh_genome_list();
   void get_genome_from_iterator();
+  void print_all_genomes();
 };
 
 #endif /* HEADER_TUX_EVOLUTION */
