@@ -263,7 +263,7 @@ ScreenManager::process_events()
             break;
 
           case SDL_WINDOWEVENT_FOCUS_LOST:
-            if(GameSession::current() != NULL &&
+            if(!Config::neat_activated && GameSession::current() != NULL &&
                GameSession::current()->is_active())
             {
               GameSession::current()->toggle_pause();
