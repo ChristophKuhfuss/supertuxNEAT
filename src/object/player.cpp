@@ -1476,7 +1476,7 @@ Player::kill(bool completely)
       return;
     }
 
-    if (player_status->coins >= 25 && !GameSession::current()->get_reset_point_sectorname().empty())
+    if (!Config::neat_activated && player_status->coins >= 25 && !GameSession::current()->get_reset_point_sectorname().empty())
     {
       for (int i = 0; i < 5; i++)
       {
