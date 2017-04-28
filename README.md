@@ -1,11 +1,10 @@
 # SuperTux + NEAT
 Creating a neural agent for the SuperTux Jump'n'Run game using the NEAT algorithm as a project for my master thesis. To accomplish this, the MultiNEAT implementation by Peter Chervenski and Shane Ryan is used (http://multineat.com/, Code at https://github.com/peter-ch/MultiNEAT/tree/master/src).
 To start the evolutionary process, compile SuperTux as usual (check the SuperTux repo for info) and execute SuperTux with the '--neat' argument.
-As of now, evolution should be functional but is missing file I/O.
 
-Things to do right now:
-- Add file handling (save/load)
-- Add autosave every nth generation
+I added several additional console arguments for customization. Just use "./supertux2 --help" after building to display all available options.
+
+NOTE: Without specifying "--autosavegen", no output files will be produced and all progress will be lost if you terminate the program!
 
 # SuperTux
 
