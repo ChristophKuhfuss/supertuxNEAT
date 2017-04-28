@@ -208,9 +208,9 @@ void TuxEvolution::set_viewing_genome()
   
   it = remaining_genomes.begin();
   
-  while ((*it)->GetID() != view_genome_id && it != remaining_genomes.end()) ++it;
+  while (it != remaining_genomes.end() && (*it)->GetID() != view_genome_id) ++it;
   
-  if ((*it)->GetID() != view_genome_id) {
+  if (it == remaining_genomes.end()) {
     std::ostringstream ss;
     ss << "Couldn't find genome with ID " << view_genome_id;
     
