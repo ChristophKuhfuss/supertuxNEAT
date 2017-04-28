@@ -581,6 +581,9 @@ GameSession::finish(bool win)
   }
 
   if(win) {
+    if (Config::neat_activated) {
+      evo_interface->on_level_won();
+    }
     if(WorldMap::current())
     {
       WorldMap::current()->finished_level(level.get());

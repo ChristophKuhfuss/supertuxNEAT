@@ -27,9 +27,20 @@ struct NeatOutputs {
 
 class TuxEvolution {
 public:
-  static const int SENSOR_GRID_SIZE = 20;
-  static const int SENSOR_GRID_PADDING = 23;
+  static const int SENSOR_GRID_SIZE = 15;
+  static const int SENSOR_GRID_PADDING = 26;
   static const bool debug = false;
+  
+  static bool using_seed;
+  static int seed;
+  
+  static const char* filename;
+  static const char* paramfilename;
+  
+  static int autosave;
+  
+  static bool viewing_mode;
+  static int view_genome_id;
 
 private:
   Parameters params;
@@ -55,6 +66,7 @@ public:
   
   double get_top_fitness();
   int get_generation_number();
+  int get_current_genome_id();
   
 private:
   static Parameters init_params();
@@ -65,6 +77,8 @@ private:
   void refresh_genome_list();
   void get_genome_from_iterator();
   void print_all_genomes();
+  void autosave_pop();
+  void set_viewing_genome();
 };
 
 #endif /* HEADER_TUX_EVOLUTION */

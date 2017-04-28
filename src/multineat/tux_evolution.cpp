@@ -4,21 +4,36 @@
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+bool TuxEvolution::using_seed;
+int TuxEvolution::seed;
+  
+const char* TuxEvolution::filename = "";
+const char* TuxEvolution::paramfilename = "";
+  
+int TuxEvolution::autosave;
+
+bool TuxEvolution::viewing_mode;
+int TuxEvolution::view_genome_id;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
   start_genome(0, SENSOR_GRID_SIZE * SENSOR_GRID_SIZE + 1, 0, 
 	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 0, params),
-  pop(start_genome, params, false, 1.0, (int) time(0)),
+  pop(strcmp(filename, "") ? Population(filename) : Population(start_genome, params, false, 1.0, (using_seed ? seed : (int) time(0)))),
   top_fitness(0),
   top_fitness_genome_id(-1),
   cur_outputs(),
   cur_inputs()
 {
-  gens = 0;
-  max_gens = 1000;
-  refresh_genome_list();
-  it = remaining_genomes.begin();
-  get_genome_from_iterator();
+  if (!viewing_mode) {
+    gens = 0;
+    max_gens = 1000;
+
+    refresh_genome_list();
+    it = remaining_genomes.begin();
+    get_genome_from_iterator();
+  } else {
+    set_viewing_genome();
+  }
 }
 
 TuxEvolution::~TuxEvolution()
@@ -33,7 +48,8 @@ void TuxEvolution::accept_inputs(NeatInputs inputs)
 // Clears the network and gives it the current inputs
 void TuxEvolution::propagate_inputs()
 {
-  cur_network.Flush();
+  //Flushing every time makes recurrent connections useless
+  //cur_network.Flush();
   vector<double> inputs = vector<double>(cur_inputs.sensors);
   inputs.push_back(1);
   cur_network.Input(cur_inputs.sensors);
@@ -62,11 +78,16 @@ bool TuxEvolution::tux_epoch()
 {
   std::cout << "Gen #" << gens << " finished." << " Max fitness: " << top_fitness << std::endl;
   if (gens < max_gens) {
+    gens++;
+    
+    if (autosave) {
+      autosave_pop();
+    }
+    
     pop.Epoch();
     refresh_genome_list();
     it = remaining_genomes.begin();
     cur_genome = *it;
-    gens++;
     std::cout << "Starting gen #" << gens << " with genome #" << cur_genome->GetID() << "..." << std::endl;
     return true;
   } else {
@@ -78,11 +99,15 @@ bool TuxEvolution::tux_epoch()
 // Returns the result of advance_genome(), which is false if the simulation finished
 bool TuxEvolution::on_tux_death(float progress, int coins)
 {
-  //Only set fitness - adjfitness is set by species on pop.Epoch()
-  cur_genome->SetFitness(tux_evaluate(progress, coins));
-  cur_genome->SetEvaluated();
-  std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << cur_genome->GetFitness() << "." << std::endl;;
-  return advance_genome();
+  if (!viewing_mode) {
+    //Only set fitness - adjfitness is set by species on pop.Epoch()
+    cur_genome->SetFitness(tux_evaluate(progress, coins));
+    cur_genome->SetEvaluated();
+    std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << cur_genome->GetFitness() << "." << std::endl;;
+    return advance_genome();
+  } else {
+    return true;
+  }
 }
 
 double TuxEvolution::tux_evaluate(float progress, int coins)
@@ -137,13 +162,11 @@ void TuxEvolution::print_all_genomes()
 Parameters TuxEvolution::init_params()
 {
   Parameters res;
-  res.PopulationSize = 70;
-  res.SurvivalRate = 0.2;
-  res.RecurrentProb = 0.01;
-  res.MutateAddLinkProb = 0.05;
-  res.MutateAddNeuronProb = 0.03;
-  res.MutateRemLinkProb = 0.01;
-  res.MutateRemSimpleNeuronProb = 0.005;
+  
+  if (strcmp(paramfilename, "") != 0) { 
+    res.Load(paramfilename);
+  }
+  
   return res;
 }
 
@@ -164,4 +187,40 @@ void TuxEvolution::get_genome_from_iterator()
   cur_genome->BuildPhenotype(cur_network);
   cur_genome->CalculateDepth();
 }
+
+int TuxEvolution::get_current_genome_id()
+{
+  return cur_genome->GetID();
+}
+
+void TuxEvolution::autosave_pop()
+{
+  if (gens % autosave == 0) {
+    std::ostringstream ss;
+    ss << "./neat_gen" << gens;
+    pop.Save(ss.str().c_str());
+  }
+}
+
+void TuxEvolution::set_viewing_genome()
+{
+  refresh_genome_list();
+  
+  it = remaining_genomes.begin();
+  
+  while ((*it)->GetID() != view_genome_id && it != remaining_genomes.end()) ++it;
+  
+  if ((*it)->GetID() != view_genome_id) {
+    std::ostringstream ss;
+    ss << "Couldn't find genome with ID " << view_genome_id;
+    
+    throw std::runtime_error(ss.str());
+  } else {
+    get_genome_from_iterator();
+    std::cout << "Found genome. Starting playback..." << std::endl;
+  }
+}
+
+
+
 

@@ -27,6 +27,7 @@
 #include "util/gettext.hpp"
 #include "version.h"
 #include "math/vector.hpp"
+#include "multineat/tux_evolution.hpp"
 
 CommandLineArguments::CommandLineArguments() :
   m_action(NO_ACTION),
@@ -110,7 +111,14 @@ CommandLineArguments::print_help(const char* arg0) const
             << _(     "  --userdir DIR                Set the directory for user data (savegames, etc.)") << "\n" << "\n"
             << _(     "Add-On Options:") << "\n"
             << _(     "  --repository-url URL         Set the URL to the Add-On repository") << "\n" << "\n"
-            << _(     "Environment variables:") << "\n"
+	    << _(     "NEAT options:") << "\n"
+	    << _(     "  --neat                       Activate NEAT") << "\n"
+	    << _(     "  --popfile FILE               Load population from file") << "\n"
+	    << _(     "  --paramfile FILE             Load population from file") << "\n"
+	    << _(     "  --randseed SEED              Use SEED for random number generation. Cannot specify this if population ist loaded from file") << "\n"
+	    << _(     "  --autosavegen INTERVAL       Autosave generation every INTERVAL generations. File format is neat_gen<gen_id>") << "\n"
+	    << _(     "  --viewgenome ID              View genome with ID. No evolution, just playback") << "\n" << "\n"
+	    << _(     "Environment variables:") << "\n"
             << _(     "  SUPERTUX2_USER_DIR           Directory for user data (savegames, etc.)" ) << "\n"
             << _(     "  SUPERTUX2_DATA_DIR           Directory for the games datafiles" ) << "\n"<< "\n"
 
@@ -379,6 +387,129 @@ CommandLineArguments::parse_args(int argc, char** argv)
       {
 	start_level = "../data/levels/world1/01 - Welcome to Antarctica.stl";
       } 
+    } 
+    else if (arg == "--randseed")
+    {
+      std::cout << arg << std::endl;
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before setting a random seed");
+      }
+      else 
+      {
+	if (strcmp(TuxEvolution::filename, "") != 0) 
+	{
+	  throw std::runtime_error("Cannot specify a seed when loading population from file");
+	}
+	int seed = 0;
+	if (i + 1 < argc && sscanf(argv[i + 1], "%d", &seed) == 1) 
+	{
+	  TuxEvolution::using_seed = true;
+	  TuxEvolution::seed = seed;
+	  ++i;
+	} 
+	else 
+	{
+	  throw std::runtime_error("Please specify a seed integer after using --seed");
+	}
+      }
+    }
+    else if (arg == "--popfile")
+    {
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before specifying a population filename");
+      }
+      
+      if (strcmp(TuxEvolution::paramfilename, "") != 0)
+      {
+	throw std::runtime_error("Cannot load population from file when a parameter file is used");
+      }
+      
+      if (TuxEvolution::using_seed)
+      {
+	throw std::runtime_error("Cannot load population from file when a seed is used");
+      }
+      
+      if (i + 1 >= argc || argv[i + 1][0] == '-') 
+      {
+	throw std::runtime_error("Need to specify a population file after using --filename");
+      }
+      else
+      {
+	TuxEvolution::filename = argv[++i];
+      }
+    }
+    else if (arg == "--paramfile")
+    {
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before specifying a parameter filename");
+      }
+      
+      if (strcmp(TuxEvolution::filename, "") != 0) 
+      {
+	throw std::runtime_error("Cannot specify a parameter filename when loading population from file");
+      }
+      
+      if (i + 1 >= argc || argv[i + 1][0] == '-') 
+      {
+	throw std::runtime_error("Need to specify a parameter file after using --paramfilename");
+      }
+      else
+      {
+	TuxEvolution::paramfilename = argv[++i];
+      }
+    }
+    else if (arg == "--autosavegen")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before specifying autosave interval");
+      }
+      
+      int autosave = 0;
+      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &autosave) == 1) 
+      {
+	if (autosave > 0) 
+	{
+	  TuxEvolution::autosave = autosave;
+	  ++i;
+	}
+	else
+	{
+	  throw std::runtime_error("Autosave interval must be > 0");
+	}
+      }
+      else
+      {
+	throw std::runtime_error("Need to specify an interval > 0 after --autosavegen");
+      }
+    }
+    else if (arg == "--viewgenome")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before viewing single genomes");
+      }
+      
+      if (strcmp(TuxEvolution::filename, "") == 0) 
+      {
+	throw std::runtime_error("Cannot specify a genome to view without loading population from file");
+      }
+      
+      int genomeid = -1;
+      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &genomeid) == 1) 
+      {
+	if (genomeid >= 0) 
+	{
+	  TuxEvolution::viewing_mode = true;
+	  TuxEvolution::view_genome_id = genomeid;
+	  ++i;
+	}
+	else
+	{
+	  throw std::runtime_error("Genome ID must be >= 0");
+	}
+      }
     }
     else if (arg[0] != '-')
     {

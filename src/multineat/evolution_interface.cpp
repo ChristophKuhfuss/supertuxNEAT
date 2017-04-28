@@ -16,11 +16,9 @@ EvolutionInterface::~EvolutionInterface()
 
 void EvolutionInterface::init()
 {
-  if (!initialized) {
-    cur_sector = cur_session->get_current_sector();
-    tux = cur_sector->player;
-    tux->set_controller(controller.get());
-  }
+  cur_sector = cur_session->get_current_sector();
+  tux = cur_sector->player;
+  tux->set_controller(controller.get());
 }
 
 
@@ -112,7 +110,6 @@ void EvolutionInterface::send_outputs()
     if (TuxEvolution::debug) {
       std::cout << "Controller press: JUMP" << std::endl;
     }
-
     controller->press(Controller::JUMP);
   }
 }
@@ -129,6 +126,12 @@ void EvolutionInterface::on_tux_death()
   fitness_idle = 0;
   max_x = 0;
 }
+
+void EvolutionInterface::on_level_won()
+{
+  std::cout << "Organism #" << neat.get_current_genome_id() << " finished the level!" << std::endl;
+}
+
 
 void EvolutionInterface::update_idle(float elapsed_time) 
 {

@@ -35,7 +35,6 @@ private:
   Vector last_known_playerpos;
   float idle;
   float fitness_idle;
-  bool initialized = false;
   float max_x;
 public:
   EvolutionInterface(GameSession* session);
@@ -43,6 +42,7 @@ public:
   void update(float elapsed_time);
   void draw(DrawingContext& context);
   void on_tux_death();
+  void on_level_won();
   void save(Writer& writer);
   ObjectSettings get_settings();
   void add_sensor(std::shared_ptr<Sensor> s);
