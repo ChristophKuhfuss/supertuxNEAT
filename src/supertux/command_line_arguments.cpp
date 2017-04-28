@@ -116,6 +116,8 @@ CommandLineArguments::print_help(const char* arg0) const
 	    << _(     "  --popfile FILE               Load population from file") << "\n"
 	    << _(     "  --paramfile FILE             Load population from file") << "\n"
 	    << _(     "  --randseed SEED              Use SEED for random number generation. Cannot specify this if population ist loaded from file") << "\n"
+	    << _(     "  --sensorgridsize SIZE        Sets the sensor grid size to SIZE") << "\n"
+	    << _(     "  --sensorgridpadding PADDING  Sets the sensor grid padding to PADDING") << "\n"
 	    << _(     "  --autosavegen INTERVAL       Autosave generation every INTERVAL generations. File format is neat_gen<gen_id>") << "\n"
 	    << _(     "  --viewgenome ID              View genome with ID. No evolution, just playback") << "\n" << "\n"
 	    << _(     "Environment variables:") << "\n"
@@ -387,7 +389,55 @@ CommandLineArguments::parse_args(int argc, char** argv)
       {
 	start_level = "../data/levels/world1/01 - Welcome to Antarctica.stl";
       } 
-    } 
+    }
+    else if (arg == "--sensorgridsize")
+    {
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before setting the sensor grid size");
+      }
+      
+      if (strcmp(TuxEvolution::filename, "") != 0) 
+      {
+	throw std::runtime_error("Cannot specify the sensor grid size when loading population from file");
+      }
+      
+      int sensor_grid_size = 0;
+      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &sensor_grid_size) == 1) 
+      {
+	TuxEvolution::custom_sensor_grid = true;
+	TuxEvolution::sensor_grid_size = sensor_grid_size;
+	++i;
+      } 
+      else 
+      {
+	throw std::runtime_error("Please specify a seed integer after using --sensorgridsize");
+      }
+    }
+    else if (arg == "--sensorgridpadding")
+    {
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before setting the sensor grid padding");
+      }
+      
+      if (strcmp(TuxEvolution::filename, "") != 0) 
+      {
+	throw std::runtime_error("Cannot specify the sensor grid padding when loading population from file");
+      }
+      
+      int sensor_grid_padding = 0;
+      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &sensor_grid_padding) == 1) 
+      {
+	TuxEvolution::custom_sensor_grid = true;
+	TuxEvolution::sensor_grid_padding = sensor_grid_padding;
+	++i;
+      } 
+      else 
+      {
+	throw std::runtime_error("Please specify a seed integer after using --sensorgridpadding");
+      }
+    }
     else if (arg == "--randseed")
     {
       std::cout << arg << std::endl;
@@ -424,6 +474,11 @@ CommandLineArguments::parse_args(int argc, char** argv)
       if (strcmp(TuxEvolution::paramfilename, "") != 0)
       {
 	throw std::runtime_error("Cannot load population from file when a parameter file is used");
+      }
+      
+      if (TuxEvolution::custom_sensor_grid)
+      {
+	throw std::runtime_error("Cannot load population from file when sensor settings are modified");
       }
       
       if (TuxEvolution::using_seed)

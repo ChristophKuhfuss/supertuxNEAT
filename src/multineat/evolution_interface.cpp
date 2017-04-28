@@ -2,7 +2,7 @@
 
 EvolutionInterface::EvolutionInterface(GameSession* session) :
 cur_session(session),
-sensorValues(new double[TuxEvolution::SENSOR_GRID_SIZE * TuxEvolution::SENSOR_GRID_SIZE]),
+sensorValues(new double[TuxEvolution::sensor_grid_size * TuxEvolution::sensor_grid_size]),
 neat(),
 controller(new CodeController),
 max_x()

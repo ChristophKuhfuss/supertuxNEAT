@@ -27,9 +27,11 @@ struct NeatOutputs {
 
 class TuxEvolution {
 public:
-  static const int SENSOR_GRID_SIZE = 15;
-  static const int SENSOR_GRID_PADDING = 26;
   static const bool debug = false;
+
+  static int sensor_grid_size;
+  static int sensor_grid_padding;
+  static bool custom_sensor_grid;
   
   static bool using_seed;
   static int seed;

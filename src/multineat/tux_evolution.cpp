@@ -4,6 +4,10 @@
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+int TuxEvolution::sensor_grid_size = 15;
+int TuxEvolution::sensor_grid_padding = 18;
+bool TuxEvolution::custom_sensor_grid = false;
+
 bool TuxEvolution::using_seed;
 int TuxEvolution::seed;
   
@@ -16,7 +20,7 @@ bool TuxEvolution::viewing_mode;
 int TuxEvolution::view_genome_id;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
-  start_genome(0, SENSOR_GRID_SIZE * SENSOR_GRID_SIZE + 1, 0, 
+  start_genome(0, sensor_grid_size * sensor_grid_size + 1, 0, 
 	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 0, params),
   pop(strcmp(filename, "") ? Population(filename) : Population(start_genome, params, false, 1.0, (using_seed ? seed : (int) time(0)))),
   top_fitness(0),

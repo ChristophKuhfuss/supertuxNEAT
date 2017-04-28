@@ -200,11 +200,11 @@ GameSession::restart_level(bool after_death)
     evo_interface->init();
     currentsector->add_object(evo_interface);
     
-    int middle = (TuxEvolution::SENSOR_GRID_PADDING * TuxEvolution::SENSOR_GRID_SIZE) / 2;
-    for (int i = 0; i < TuxEvolution::SENSOR_GRID_SIZE; i++) {
-      for (int j = 0; j < TuxEvolution::SENSOR_GRID_SIZE; j++) {
-	std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(currentsector, i * TuxEvolution::SENSOR_GRID_PADDING - middle, 
-	  j * TuxEvolution::SENSOR_GRID_PADDING - middle);
+    int middle = (TuxEvolution::sensor_grid_padding * TuxEvolution::sensor_grid_size) / 2;
+    for (int i = 0; i < TuxEvolution::sensor_grid_size; i++) {
+      for (int j = 0; j < TuxEvolution::sensor_grid_size; j++) {
+	std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(currentsector, i * TuxEvolution::sensor_grid_padding - middle, 
+	  j * TuxEvolution::sensor_grid_padding - middle);
 	currentsector->add_object(sensor);
 	evo_interface->add_sensor(sensor);
       }
