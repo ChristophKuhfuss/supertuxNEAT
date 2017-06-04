@@ -4,6 +4,8 @@
 #include <vector>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+int TuxEvolution::max_gens = 100;
+
 int TuxEvolution::sensor_grid_size = 15;
 int TuxEvolution::sensor_grid_padding = 18;
 bool TuxEvolution::custom_sensor_grid = false;
@@ -91,7 +93,7 @@ bool TuxEvolution::tux_epoch()
     pop.Epoch();
     refresh_genome_list();
     it = remaining_genomes.begin();
-    cur_genome = *it;
+    get_genome_from_iterator();
     std::cout << "Starting gen #" << gens << " with genome #" << cur_genome->GetID() << "..." << std::endl;
     return true;
   } else {

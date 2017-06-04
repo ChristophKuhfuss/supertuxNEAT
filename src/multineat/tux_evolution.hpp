@@ -28,6 +28,8 @@ struct NeatOutputs {
 class TuxEvolution {
 public:
   static const bool debug = false;
+  
+  static int max_gens;
 
   static int sensor_grid_size;
   static int sensor_grid_padding;
@@ -51,7 +53,6 @@ private:
   double top_fitness;
   int top_fitness_genome_id;
   int gens;
-  int max_gens;
   vector<Genome*> remaining_genomes;
   Genome* cur_genome;
   NeuralNetwork cur_network;

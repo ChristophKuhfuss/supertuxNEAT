@@ -113,6 +113,7 @@ CommandLineArguments::print_help(const char* arg0) const
             << _(     "  --repository-url URL         Set the URL to the Add-On repository") << "\n" << "\n"
 	    << _(     "NEAT options:") << "\n"
 	    << _(     "  --neat                       Activate NEAT") << "\n"
+	    << _(     "  --maxgens NUM                Use NUM to specify the last generation ID") << "\n"
 	    << _(     "  --popfile FILE               Load population from file") << "\n"
 	    << _(     "  --paramfile FILE             Load population from file") << "\n"
 	    << _(     "  --randseed SEED              Use SEED for random number generation. Cannot specify this if population ist loaded from file") << "\n"
@@ -538,6 +539,30 @@ CommandLineArguments::parse_args(int argc, char** argv)
       else
       {
 	throw std::runtime_error("Need to specify an interval > 0 after --autosavegen");
+      }
+    }
+    else if (arg == "--maxgens")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before specifying max gen id");
+      }
+      
+      int maxgens = 0;
+      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &maxgens) == 1) 
+      {
+	if (maxgens > 0) 
+	{
+	  TuxEvolution::max_gens = maxgens;
+	  ++i;
+	}
+	else
+	{
+	  throw std::runtime_error("Max generation must be > 0");
+	}
+      }
+      else
+      {
+	throw std::runtime_error("Need to specify an integer > 0 after --maxgens");
       }
     }
     else if (arg == "--viewgenome")
