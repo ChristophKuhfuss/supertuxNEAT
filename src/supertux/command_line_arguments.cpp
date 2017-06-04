@@ -441,7 +441,6 @@ CommandLineArguments::parse_args(int argc, char** argv)
     }
     else if (arg == "--randseed")
     {
-      std::cout << arg << std::endl;
       if (m_action != START_EVOLUTION) 
       {
 	throw std::runtime_error("Need to specify NEAT usage before setting a random seed");
