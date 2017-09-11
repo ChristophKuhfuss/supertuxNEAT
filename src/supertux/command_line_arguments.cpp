@@ -398,10 +398,10 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Need to specify NEAT usage before setting the sensor grid size");
       }
       
-      if (strcmp(TuxEvolution::filename, "") != 0) 
+      /*if (strcmp(TuxEvolution::filename, "") != 0) 
       {
 	throw std::runtime_error("Cannot specify the sensor grid size when loading population from file");
-      }
+      }*/
       
       int sensor_grid_size = 0;
       if (i + 1 < argc && sscanf(argv[i + 1], "%d", &sensor_grid_size) == 1) 
@@ -422,10 +422,10 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Need to specify NEAT usage before setting the sensor grid padding");
       }
       
-      if (strcmp(TuxEvolution::filename, "") != 0) 
+      /*if (strcmp(TuxEvolution::filename, "") != 0) 
       {
 	throw std::runtime_error("Cannot specify the sensor grid padding when loading population from file");
-      }
+      }*/
       
       int sensor_grid_padding = 0;
       if (i + 1 < argc && sscanf(argv[i + 1], "%d", &sensor_grid_padding) == 1) 
@@ -476,10 +476,10 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Cannot load population from file when a parameter file is used");
       }
       
-      if (TuxEvolution::custom_sensor_grid)
+      /*if (TuxEvolution::custom_sensor_grid)
       {
 	throw std::runtime_error("Cannot load population from file when sensor settings are modified");
-      }
+      }*/
       
       if (TuxEvolution::using_seed)
       {

@@ -49,9 +49,11 @@
 #endif
 
 /** ticks (as returned from SDL_GetTicks) per frame */
-static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
+//static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
+static const Uint32 TICKS_PER_FRAME = (Uint32) (250.0 / LOGICAL_FPS);
 /** don't skip more than every 2nd frame */
-static const int MAX_FRAME_SKIP = 2;
+//static const int MAX_FRAME_SKIP = 2;
+static const int MAX_FRAME_SKIP = 8;
 
 ScreenManager::ScreenManager() :
   m_waiting_threads(),

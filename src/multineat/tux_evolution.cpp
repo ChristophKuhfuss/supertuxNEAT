@@ -22,9 +22,9 @@ bool TuxEvolution::viewing_mode;
 int TuxEvolution::view_genome_id;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
-  start_genome(0, sensor_grid_size * sensor_grid_size + 1, 0, 
-	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 0, params),
-  pop(strcmp(filename, "") ? Population(filename) : Population(start_genome, params, false, 1.0, (using_seed ? seed : (int) time(0)))),
+  start_genome(0, sensor_grid_size * sensor_grid_size + 1, 5, 
+	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 1, params),
+  pop(strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 2.0, (using_seed ? seed : (int) time(0)))),
   top_fitness(0),
   top_fitness_genome_id(-1),
   cur_outputs(),
@@ -32,7 +32,6 @@ TuxEvolution::TuxEvolution() : params(init_params()),
 {
   if (!viewing_mode) {
     gens = 0;
-    max_gens = 1000;
 
     refresh_genome_list();
     it = remaining_genomes.begin();
@@ -83,31 +82,31 @@ NeatOutputs TuxEvolution::get_outputs()
 bool TuxEvolution::tux_epoch()
 {
   std::cout << "Gen #" << gens << " finished." << " Max fitness: " << top_fitness << std::endl;
-  if (gens < max_gens) {
-    gens++;
-    
-    if (autosave) {
-      autosave_pop();
-    }
-    
+  if (autosave) {
+    autosave_pop();
+  }
+  gens++;
+  if (gens < max_gens) {    
     pop.Epoch();
     refresh_genome_list();
     it = remaining_genomes.begin();
     get_genome_from_iterator();
+    top_fitness = 0;
     std::cout << "Starting gen #" << gens << " with genome #" << cur_genome->GetID() << "..." << std::endl;
     return true;
   } else {
+    std::cout << "Finished evolution." << std::endl;
     return false;
   }
 }
 
 // Calculates fitness of current genome and marks the evaluated flag
 // Returns the result of advance_genome(), which is false if the simulation finished
-bool TuxEvolution::on_tux_death(float progress, int coins)
+bool TuxEvolution::on_tux_death(float progress)
 {
   if (!viewing_mode) {
     //Only set fitness - adjfitness is set by species on pop.Epoch()
-    cur_genome->SetFitness(tux_evaluate(progress, coins));
+    cur_genome->SetFitness(tux_evaluate(progress));
     cur_genome->SetEvaluated();
     std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << cur_genome->GetFitness() << "." << std::endl;;
     return advance_genome();
@@ -116,9 +115,9 @@ bool TuxEvolution::on_tux_death(float progress, int coins)
   }
 }
 
-double TuxEvolution::tux_evaluate(float progress, int coins)
+double TuxEvolution::tux_evaluate(float progress)
 {
-  float fitness = progress + coins;
+  float fitness = progress;
   if (fitness > top_fitness) {
     top_fitness = fitness;
   }

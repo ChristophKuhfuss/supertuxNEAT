@@ -110,12 +110,6 @@ GameSession::reset_level()
 int
 GameSession::restart_level(bool after_death)
 {
-  if (Config::neat_activated) {
-    if (after_death) {
-      evo_interface->on_tux_death();
-    }
-  }
-  
   PlayerStatus* currentStatus = m_savegame.get_player_status();
 
   if (!Config::neat_activated) {
@@ -197,6 +191,10 @@ GameSession::restart_level(bool after_death)
   }
 
   if (Config::neat_activated) {
+    if (after_death) {
+      evo_interface->on_tux_death();
+    }
+    
     evo_interface->init();
     currentsector->add_object(evo_interface);
     

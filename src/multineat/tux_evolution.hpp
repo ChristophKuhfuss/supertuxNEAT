@@ -63,7 +63,7 @@ private:
 public:
   TuxEvolution();
   ~TuxEvolution();
-  bool on_tux_death(float progress, int coins);
+  bool on_tux_death(float progress);
   void accept_inputs(NeatInputs inputs);
   NeatOutputs get_outputs();
   
@@ -74,7 +74,7 @@ public:
 private:
   static Parameters init_params();
   bool tux_epoch();
-  double tux_evaluate(float progress, int coins);
+  double tux_evaluate(float progress);
   void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();

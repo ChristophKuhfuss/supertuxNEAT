@@ -118,8 +118,8 @@ void EvolutionInterface::on_tux_death()
 {
   sensors.clear();
   
-  if (!neat.on_tux_death(tux->get_pos().x, tux->get_coins())) {
-    cur_session->toggle_pause();
+  if (!neat.on_tux_death(tux->get_pos().x)) {
+    scripting::quit();
   }
   
   idle = 0;

@@ -12,6 +12,7 @@
 #include "supertux/game_session.hpp"
 #include "control/codecontroller.hpp"
 #include "object/player.hpp"
+#include "scripting/functions.hpp"
 
 using namespace NEAT;
 

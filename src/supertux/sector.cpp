@@ -95,10 +95,6 @@ Sector::Sector(Level* parent) :
   add_object(std::make_shared<Player>(player_status, "Tux"));
   add_object(std::make_shared<DisplayEffect>("Effect"));
   add_object(std::make_shared<TextObject>("Text"));
-  
-  if (Config::neat_activated) {
-    //TODO Create NEAT stuff
-  }
 
   SoundManager::current()->preload("sounds/shoot.wav");
 
@@ -1447,6 +1443,7 @@ Sector::save(Writer &writer)
 
   writer.end_list("sector");
 }
+
 
 /* vim: set sw=2 sts=2 et : */
 /* EOF */

@@ -25,6 +25,7 @@
 #include "supertux/game_session.hpp"
 #include "supertux/object_factory.hpp"
 #include "supertux/sector.hpp"
+#include <supertux/gameconfig.hpp>
 #include "util/reader_mapping.hpp"
 
 Firefly::Firefly(const ReaderMapping& lisp) :
@@ -75,6 +76,9 @@ Firefly::reactivate()
 HitResponse
 Firefly::collision(GameObject& other, const CollisionHit& )
 {
+  if (Config::neat_activated)
+    return ABORT_MOVE;
+  
   // If the bell is already activated, don't ring it again!
   if(activated || sprite->get_action() == "ringing")
     return ABORT_MOVE;
