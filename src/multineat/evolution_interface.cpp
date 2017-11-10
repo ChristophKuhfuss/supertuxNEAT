@@ -24,6 +24,11 @@ void EvolutionInterface::init()
 
 void EvolutionInterface::update(float elapsed_time) 
 {
+  if (TuxEvolution::debug) {
+    std::cerr << "Elapsed time: " << elapsed_time << std::endl;
+    debug_print();
+  }
+  
   update_idle(elapsed_time);
   if (idle < TIMEOUT && fitness_idle < FITNESS_TIMEOUT) {
     neat.accept_inputs(generate_inputs());
@@ -41,11 +46,8 @@ NeatInputs EvolutionInterface::generate_inputs()
     
     for (it = sensors.begin(); it != sensors.end(); ++it) {
       inputs.push_back((*it)->getValue());
-      //std::cout << (*it)->getValue() << " ";
     }
-    
-    //std::cout << std::endl;
-    
+        
     NeatInputs res;
     res.sensors = inputs;
     
@@ -55,7 +57,7 @@ NeatInputs EvolutionInterface::generate_inputs()
 
 void EvolutionInterface::draw(DrawingContext& context) 
 {
-  //TODO Draw evolution information to screen
+  //TODO Draw evolution information to screen (maybe, maybe not, probably not)
 }
 
 void EvolutionInterface::send_inputs(NeatInputs inputs)
@@ -70,21 +72,21 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.direction_up >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cout << "Controller press: UP" << std::endl;
+      std::cerr << "Controller press: UP" << std::endl;
     }
     controller->press(Controller::UP);
   }
   
   if (outputs.direction_down >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cout << "Controller press: DOWN" << std::endl;
+      std::cerr << "Controller press: DOWN" << std::endl;
     }
     controller->press(Controller::DOWN);
   }
   
   if (outputs.direction_left >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cout << "Controller press: LEFT" << std::endl;
+      std::cerr << "Controller press: LEFT" << std::endl;
     }
 
     controller->press(Controller::LEFT);
@@ -92,7 +94,7 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.direction_right >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cout << "Controller press: RIGHT" << std::endl;
+      std::cerr << "Controller press: RIGHT" << std::endl;
     }
 
     controller->press(Controller::RIGHT);
@@ -100,7 +102,7 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.action >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cout << "Controller press: ACTION" << std::endl;
+      std::cerr << "Controller press: ACTION" << std::endl;
     }
 
     controller->press(Controller::ACTION);
@@ -108,7 +110,7 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.action >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cout << "Controller press: JUMP" << std::endl;
+      std::cerr << "Controller press: JUMP" << std::endl;
     }
     controller->press(Controller::JUMP);
   }
@@ -116,7 +118,12 @@ void EvolutionInterface::send_outputs()
 
 void EvolutionInterface::on_tux_death()
 {
+  if (TuxEvolution::debug) {
+    std::cerr << "-------------------------------" << std::endl;
+  }
+  
   sensors.clear();
+  controller->reset();
   
   if (!neat.on_tux_death(tux->get_pos().x)) {
     scripting::quit();
@@ -130,6 +137,7 @@ void EvolutionInterface::on_tux_death()
 void EvolutionInterface::on_level_won()
 {
   std::cout << "Organism #" << neat.get_current_genome_id() << " finished the level!" << std::endl;
+  neat.on_level_won();
 }
 
 
@@ -152,11 +160,11 @@ void EvolutionInterface::update_idle(float elapsed_time)
 
 void EvolutionInterface::timeout() 
 {
-  on_tux_death();
-  
   if (TuxEvolution::debug) {
     std::cout << "Timeout occured!" << std::endl;
   }
+  
+  on_tux_death();
   
   cur_session->restart_level(false);
 }
@@ -176,4 +184,16 @@ void EvolutionInterface::save(Writer& writer)
 {
   GameObject::save(writer);
 }
+
+void EvolutionInterface::debug_print()
+{
+  std::cerr << "Tux pos: " << tux->get_pos().x << ", " << tux->get_pos().y << std::endl;
+  for (int i = 0; i < sensors.size(); i++) {
+    Sensor s = *sensors[i];
+    std::cerr << s.getValue();
+  }
+  
+  std::cerr << std::endl;
+}
+
 

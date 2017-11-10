@@ -54,6 +54,7 @@ private:
   void send_outputs();
   void update_idle(float elapsed_time);
   void timeout();
+  void debug_print();
 };
 
 #endif /* HEADER_EVOLUTION_INTERFACE */
