@@ -6,6 +6,9 @@ I added several additional console arguments for customization. Just use "./supe
 
 NOTE: Without specifying "--autosavegen", no output files will be produced and all progress will be lost if you terminate the program!
 
+Currently known bugs:
+- Runs are NOT reproducable even when using seeds when initializing evolution. The first few generations will be identical, but after some point in time, the following will differ. This point is the same when the seed doesn't change, just the results after this point will be completely different.
+
 # SuperTux
 
 [![Build Status](https://travis-ci.org/SuperTux/supertux.svg?branch=master)](https://travis-ci.org/SuperTux/supertux)
