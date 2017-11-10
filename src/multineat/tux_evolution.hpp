@@ -41,7 +41,7 @@ public:
   static const char* filename;
   static const char* paramfilename;
   
-  static int autosave;
+  static int autosave_interval;
   
   static bool viewing_mode;
   static int view_genome_id;
@@ -71,6 +71,8 @@ public:
   int get_generation_number();
   int get_current_genome_id();
   
+  void on_level_won();
+  
 private:
   static Parameters init_params();
   bool tux_epoch();
@@ -80,7 +82,8 @@ private:
   void refresh_genome_list();
   void get_genome_from_iterator();
   void print_all_genomes();
-  void autosave_pop();
+  void autosave();
+  void save_pop();
   void set_viewing_genome();
 };
 

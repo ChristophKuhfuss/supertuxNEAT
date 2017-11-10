@@ -16,7 +16,7 @@ int TuxEvolution::seed;
 const char* TuxEvolution::filename = "";
 const char* TuxEvolution::paramfilename = "";
   
-int TuxEvolution::autosave;
+int TuxEvolution::autosave_interval;
 
 bool TuxEvolution::viewing_mode;
 int TuxEvolution::view_genome_id;
@@ -30,6 +30,8 @@ TuxEvolution::TuxEvolution() : params(init_params()),
   cur_outputs(),
   cur_inputs()
 {
+  pop.m_RNG.Seed(seed);
+  
   if (!viewing_mode) {
     gens = 0;
 
@@ -57,7 +59,7 @@ void TuxEvolution::propagate_inputs()
   //cur_network.Flush();
   vector<double> inputs = vector<double>(cur_inputs.sensors);
   inputs.push_back(1);
-  cur_network.Input(cur_inputs.sensors);
+  cur_network.Input(inputs);
   
   // Activate depth times to ensure full input propagation
   for (unsigned int i = 0; i < cur_genome->GetDepth(); i++) {
@@ -81,9 +83,9 @@ NeatOutputs TuxEvolution::get_outputs()
 // Advances the population to the next generation
 bool TuxEvolution::tux_epoch()
 {
-  std::cout << "Gen #" << gens << " finished." << " Max fitness: " << top_fitness << std::endl;
-  if (autosave) {
-    autosave_pop();
+  std::cout << "Generation #" << (gens + 1) << " finished." << " Max fitness: " << top_fitness << std::endl;
+  if (autosave_interval) {
+    autosave();
   }
   gens++;
   if (gens < max_gens) {    
@@ -92,7 +94,7 @@ bool TuxEvolution::tux_epoch()
     it = remaining_genomes.begin();
     get_genome_from_iterator();
     top_fitness = 0;
-    std::cout << "Starting gen #" << gens << " with genome #" << cur_genome->GetID() << "..." << std::endl;
+    std::cout << "Starting generation #" << (gens + 1) << " with genome #" << cur_genome->GetID() << "..." << std::endl;
     return true;
   } else {
     std::cout << "Finished evolution." << std::endl;
@@ -111,6 +113,7 @@ bool TuxEvolution::on_tux_death(float progress)
     std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << cur_genome->GetFitness() << "." << std::endl;;
     return advance_genome();
   } else {
+    cur_network.Flush();
     return true;
   }
 }
@@ -134,7 +137,7 @@ bool TuxEvolution::advance_genome()
     //std::cout << "Continuing evolution with genome #" << cur_genome->GetID() << "." << std::endl;
     return true;
   } else {
-    print_all_genomes();
+    //print_all_genomes();
     return tux_epoch();
   }
 }
@@ -147,6 +150,7 @@ void TuxEvolution::refresh_genome_list()
   
   for (unsigned int i = 0; i < pop.m_Species.size(); i++) {
     Species* cur = &pop.m_Species[i];
+    std::cout << "Species #" << cur->ID() << " has " << cur->m_Individuals.size() << " individuals" << std::endl;
     for (unsigned int j = 0; j < cur->m_Individuals.size(); j++) {
       remaining_genomes.push_back(&cur->m_Individuals[j]);
     }
@@ -198,14 +202,20 @@ int TuxEvolution::get_current_genome_id()
   return cur_genome->GetID();
 }
 
-void TuxEvolution::autosave_pop()
+void TuxEvolution::autosave()
 {
-  if (gens % autosave == 0) {
-    std::ostringstream ss;
-    ss << "./neat_gen" << gens;
-    pop.Save(ss.str().c_str());
+  if ((gens + 1) % autosave_interval == 0) {
+    save_pop();
   }
 }
+
+void TuxEvolution::save_pop()
+{
+    std::ostringstream ss;
+    ss << "./neat_gen" << (gens + 1);
+    pop.Save(ss.str().c_str());
+}
+
 
 void TuxEvolution::set_viewing_genome()
 {
@@ -226,6 +236,10 @@ void TuxEvolution::set_viewing_genome()
   }
 }
 
+void TuxEvolution::on_level_won()
+{
+  save_pop();
+}
 
 
 
