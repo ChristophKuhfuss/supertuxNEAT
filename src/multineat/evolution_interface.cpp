@@ -1,4 +1,5 @@
 #include "evolution_interface.hpp"
+#include <supertux/gameconfig.hpp>
 
 EvolutionInterface::EvolutionInterface(GameSession* session) :
 cur_session(session),
@@ -23,11 +24,9 @@ void EvolutionInterface::init()
 
 
 void EvolutionInterface::update(float elapsed_time) 
-{
-  if (TuxEvolution::debug) {
-    std::cerr << "Elapsed time: " << elapsed_time << std::endl;
+{  
+  if (TuxEvolution::debug)
     debug_print();
-  }
   
   update_idle(elapsed_time);
   if (idle < TIMEOUT && fitness_idle < FITNESS_TIMEOUT) {
@@ -72,21 +71,21 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.direction_up >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cerr << "Controller press: UP" << std::endl;
+      std::cerr << "Button:U" << std::endl;
     }
     controller->press(Controller::UP);
   }
   
   if (outputs.direction_down >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cerr << "Controller press: DOWN" << std::endl;
+      std::cerr << "Button:D" << std::endl;
     }
     controller->press(Controller::DOWN);
   }
   
   if (outputs.direction_left >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cerr << "Controller press: LEFT" << std::endl;
+      std::cerr << "Button:L" << std::endl;
     }
 
     controller->press(Controller::LEFT);
@@ -94,7 +93,7 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.direction_right >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cerr << "Controller press: RIGHT" << std::endl;
+      std::cerr << "Button:R" << std::endl;
     }
 
     controller->press(Controller::RIGHT);
@@ -102,7 +101,7 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.action >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cerr << "Controller press: ACTION" << std::endl;
+      std::cerr << "Button:A" << std::endl;
     }
 
     controller->press(Controller::ACTION);
@@ -110,7 +109,7 @@ void EvolutionInterface::send_outputs()
   
   if (outputs.action >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
-      std::cerr << "Controller press: JUMP" << std::endl;
+      std::cerr << "Button:J" << std::endl;
     }
     controller->press(Controller::JUMP);
   }
@@ -187,7 +186,7 @@ void EvolutionInterface::save(Writer& writer)
 
 void EvolutionInterface::debug_print()
 {
-  std::cerr << "Tux pos: " << tux->get_pos().x << ", " << tux->get_pos().y << std::endl;
+  std::cerr << "Tux:" << tux->get_pos().x << "," << tux->get_pos().y << std::endl;
   for (int i = 0; i < sensors.size(); i++) {
     Sensor s = *sensors[i];
     std::cerr << s.getValue();

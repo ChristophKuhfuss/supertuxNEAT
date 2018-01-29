@@ -56,13 +56,14 @@ public:
   VideoSystem::Enum video;
   bool try_vsync;
   bool show_fps;
-  bool show_player_pos;
+  bool show_player_pos = true;
   bool sound_enabled;
   bool music_enabled;
   
   /** central neat control variable 
       static so it's accessible from anywhere*/
   static bool neat_activated;
+  static bool neat_headless_mode;
 
   /** initial random seed.  0 ==> set from time() */
   int random_seed;

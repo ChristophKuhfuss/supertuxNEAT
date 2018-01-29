@@ -349,6 +349,8 @@ Sector::get_foremost_layer() const
 void
 Sector::update(float elapsed_time)
 {
+  //print_gameobject_statistics();
+
   player->check_bounds();
 
   /* update objects */
@@ -841,7 +843,7 @@ Sector::collision_static_constrains(MovingObject& object)
   Vector movement = object.get_movement();
   Vector pressure = Vector(0,0);
   Rectf& dest = object.dest;
-
+  
   for(int i = 0; i < 2; ++i) {
     collision_static(&constraints, Vector(0, movement.y), dest, object);
     if(!constraints.has_constraints())
@@ -878,6 +880,7 @@ Sector::collision_static_constrains(MovingObject& object)
   constraints = Constraints();
   for(int i = 0; i < 2; ++i) {
     collision_static(&constraints, movement, dest, object);
+
     if(!constraints.has_constraints())
       break;
 
@@ -959,15 +962,17 @@ Sector::handle_collisions()
   }
 
   using namespace collision;
+  
 
   // calculate destination positions of the objects
   for(const auto& moving_object : moving_objects) {
+    
+	 
     Vector mov = moving_object->get_movement();
-
     // make sure movement is never faster than MAX_SPEED. Norm is pretty fat, so two addl. checks are done before.
     if (((mov.x > MAX_SPEED * M_SQRT1_2) || (mov.y > MAX_SPEED * M_SQRT1_2)) && (mov.norm() > MAX_SPEED)) {
       moving_object->movement = mov.unit() * MAX_SPEED;
-      //log_debug << "Temporarily reduced object's speed of " << mov.norm() << " to " << moving_object->movement.norm() << "." << std::endl;
+//       log_debug << "Temporarily reduced object's speed of " << mov.norm() << " to " << moving_object->movement.norm() << "." << std::endl;
     }
 
     moving_object->dest = moving_object->get_bbox();
@@ -1125,6 +1130,30 @@ Sector::is_free_of_movingstatics(const Rectf& rect, const MovingObject* ignore_o
 
   return true;
 }
+
+bool Sector::is_free_of_enemies(const Rectf& rect, const MovingObject* ignore_object) const
+{
+  using namespace collision;
+
+  if (!is_free_of_tiles(rect)) return false;
+
+  for(const auto& moving_object : moving_objects) {
+    if (moving_object == ignore_object) continue;
+    if (!moving_object->is_valid()) continue;
+    if (!dynamic_cast<BadGuy*>(moving_object)) continue;
+    if ((moving_object->get_group() == COLGROUP_MOVING)
+        || (moving_object->get_group() == COLGROUP_MOVING_STATIC)
+        || (moving_object->get_group() == COLGROUP_STATIC)) {
+      if(intersects(rect, moving_object->get_bbox())) {
+	Rectf r = moving_object->get_bbox();
+	return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 
 bool
 Sector::free_line_of_sight(const Vector& line_start, const Vector& line_end, const MovingObject* ignore_object) const
@@ -1443,7 +1472,6 @@ Sector::save(Writer &writer)
 
   writer.end_list("sector");
 }
-
 
 /* vim: set sw=2 sts=2 et : */
 /* EOF */

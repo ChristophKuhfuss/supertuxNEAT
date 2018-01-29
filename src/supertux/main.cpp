@@ -350,35 +350,51 @@ static inline void timelog(const char* component)
 void
 Main::launch_game()
 {
+  if (Config::neat_headless_mode)
+    g_config->video = VideoSystem::DUMMY;
 
   SDLSubsystem sdl_subsystem;
   ConsoleBuffer console_buffer;
-
+  std::cout << "Initialized subsystem and console buffer..." << std::endl;
   timelog("controller");
   InputManager input_manager(g_config->keyboard_config, g_config->joystick_config);
-
+  std::cout << "Initialized input manager..." << std::endl;
   timelog("commandline");
 
   timelog("video");
   std::unique_ptr<VideoSystem> video_system = VideoSystem::create(g_config->video);
+  std::cout << "Initialized video system..." << std::endl;
   DrawingContext context(*video_system);
+  std::cout << "Initialized drawing context..." << std::endl;
+  
+//   if (!Config::neat_headless_mode)
   init_video();
+  std::cout << "init_video() successful" << std::endl;
 
   timelog("audio");
   SoundManager sound_manager;
   sound_manager.enable_sound(g_config->sound_enabled);
   sound_manager.enable_music(g_config->music_enabled);
 
+  std::cout << "Initialized sound manager..." << std::endl;
+  
   Console console(console_buffer);
-
+  std::cout << "Initialized console..." << std::endl;
+  
   timelog("scripting");
   scripting::Scripting scripting(g_config->enable_script_debugger);
+  
+  std::cout << "Initialized scripting..." << std::endl;
 
   timelog("resources");
   TileManager tile_manager;
+  std::cout << "Initialized tile manager..." << std::endl;
   SpriteManager sprite_manager;
+  std::cout << "Initialized sprite manager..." << std::endl;
+  
   Resources resources;
-
+  std::cout << "Initialized resources..." << std::endl;
+  
   timelog("addons");
   AddonManager addon_manager("addons", g_config->addons);
 
@@ -425,6 +441,7 @@ Main::launch_game()
 
       if(!g_config->record_demo.empty())
         session->record_demo(g_config->record_demo);
+      
       screen_manager.push_screen(std::move(session));
     }
   } else {
@@ -511,6 +528,11 @@ Main::run(int argc, char** argv)
 	
       case CommandLineArguments::START_EVOLUTION:
 	launch_evolution();
+	break;
+	
+      case CommandLineArguments::START_EVOLUTION_HEADLESS:
+	launch_evolution();
+	//launch_headless_evolution();
 	break;
 
       default:

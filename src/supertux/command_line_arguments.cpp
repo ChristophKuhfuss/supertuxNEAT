@@ -113,6 +113,7 @@ CommandLineArguments::print_help(const char* arg0) const
             << _(     "  --repository-url URL         Set the URL to the Add-On repository") << "\n" << "\n"
 	    << _(     "NEAT options:") << "\n"
 	    << _(     "  --neat                       Activate NEAT") << "\n"
+	    << _(     "  --headless                   Start evolution in headless mode") << "\n"
 	    << _(     "  --maxgens NUM                Use NUM to specify the last generation ID") << "\n"
 	    << _(     "  --popfile FILE               Load population from file") << "\n"
 	    << _(     "  --paramfile FILE             Load population from file") << "\n"
@@ -391,6 +392,16 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	start_level = "../data/levels/world1/01 - Welcome to Antarctica.stl";
       } 
     }
+    else if (arg == "--headless")
+    {
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before setting headless mode");
+      }
+      
+      m_action = START_EVOLUTION;
+      Config::neat_headless_mode = true;
+    }
     else if (arg == "--sensorgridsize")
     {
       if (m_action != START_EVOLUTION) 
@@ -471,20 +482,11 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Need to specify NEAT usage before specifying a population filename");
       }
       
-      if (strcmp(TuxEvolution::paramfilename, "") != 0)
-      {
-	throw std::runtime_error("Cannot load population from file when a parameter file is used");
-      }
-      
       /*if (TuxEvolution::custom_sensor_grid)
       {
 	throw std::runtime_error("Cannot load population from file when sensor settings are modified");
       }*/
       
-      if (TuxEvolution::using_seed)
-      {
-	throw std::runtime_error("Cannot load population from file when a seed is used");
-      }
       
       if (i + 1 >= argc || argv[i + 1][0] == '-') 
       {
@@ -500,11 +502,6 @@ CommandLineArguments::parse_args(int argc, char** argv)
       if (m_action != START_EVOLUTION) 
       {
 	throw std::runtime_error("Need to specify NEAT usage before specifying a parameter filename");
-      }
-      
-      if (strcmp(TuxEvolution::filename, "") != 0) 
-      {
-	throw std::runtime_error("Cannot specify a parameter filename when loading population from file");
       }
       
       if (i + 1 >= argc || argv[i + 1][0] == '-') 
@@ -527,7 +524,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
       {
 	if (autosave > 0) 
 	{
-	  TuxEvolution::autosave = autosave;
+	  TuxEvolution::autosave_interval = autosave;
 	  ++i;
 	}
 	else
@@ -568,6 +565,10 @@ CommandLineArguments::parse_args(int argc, char** argv)
     {
       if (m_action != START_EVOLUTION) {
 	throw std::runtime_error("Need to specify NEAT usage before viewing single genomes");
+      }
+      
+      if (Config::neat_headless_mode) {
+	throw std::runtime_error("Cannot view genomes in headless mode");
       }
       
       if (strcmp(TuxEvolution::filename, "") == 0) 
@@ -611,7 +612,8 @@ CommandLineArguments::merge_into(Config& config)
   merge_option(window_size);
   merge_option(aspect_size);
   merge_option(use_fullscreen);
-  merge_option(video);
+  if (!Config::neat_headless_mode)
+    merge_option(video);
   merge_option(show_fps);
   merge_option(show_player_pos);
   merge_option(sound_enabled);

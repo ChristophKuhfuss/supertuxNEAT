@@ -118,6 +118,7 @@ GameSession::restart_level(bool after_death)
     max_fire_bullets_at_start = currentStatus->max_fire_bullets;
     max_ice_bullets_at_start = currentStatus->max_ice_bullets;
   } else {
+    g_config->random_seed = gameRandom.srand(12345);
     coins_at_start = 100;
     bonus_at_start = NO_BONUS;
     max_fire_bullets_at_start = 0;
@@ -181,7 +182,7 @@ GameSession::restart_level(bool after_death)
     currentsector->play_music(LEVEL_MUSIC);
   }
 
-  if(!capture_file.empty()) {
+  if(!capture_file.empty() && !Config::neat_activated) {
     int newSeed=0;               // next run uses a new seed
     while (newSeed == 0)            // which is the next non-zero random num.
       newSeed = gameRandom.rand();
@@ -208,7 +209,7 @@ GameSession::restart_level(bool after_death)
       }
     }
   }
-  
+    
   return (0);
 }
 

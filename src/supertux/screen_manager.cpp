@@ -49,11 +49,11 @@
 #endif
 
 /** ticks (as returned from SDL_GetTicks) per frame */
-//static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
-static const Uint32 TICKS_PER_FRAME = (Uint32) (250.0 / LOGICAL_FPS);
+// static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
+// static const Uint32 TICKS_PER_FRAME = (Uint32) (62.5 / LOGICAL_FPS);
+static const Uint32 TICKS_PER_FRAME = (Uint32) (1 / LOGICAL_FPS);	// For headless mode testing
 /** don't skip more than every 2nd frame */
-//static const int MAX_FRAME_SKIP = 2;
-static const int MAX_FRAME_SKIP = 8;
+static const int MAX_FRAME_SKIP = 2;
 
 ScreenManager::ScreenManager() :
   m_waiting_threads(),
@@ -182,10 +182,10 @@ ScreenManager::draw(DrawingContext& context)
     draw_fps(context, m_fps);
   }
 
-  if (g_config->show_player_pos)
-  {
+//   if (g_config->show_player_pos)
+//   {
     draw_player_pos(context);
-  }
+//   }
 
   // if a screenshot was requested, pass request on to drawing_context
   if (m_screenshot_requested)
@@ -380,53 +380,74 @@ ScreenManager::run(DrawingContext &context)
 
   handle_screen_switch();
 
-  while (!m_screen_stack.empty())
-  {
-    Uint32 ticks = SDL_GetTicks();
-    elapsed_ticks += ticks - last_ticks;
-    last_ticks = ticks;
-
-    Uint32 ticks_per_frame = (Uint32) (TICKS_PER_FRAME * g_game_speed);
-
-    if (elapsed_ticks > ticks_per_frame*4)
+   if (!Config::neat_headless_mode) {
+    while (!m_screen_stack.empty())
     {
-      // when the game loads up or levels are switched the
-      // elapsed_ticks grows extremely large, so we just ignore those
-      // large time jumps
-      elapsed_ticks = 0;
+      Uint32 ticks;
+      ticks = SDL_GetTicks();
+      elapsed_ticks += ticks - last_ticks;
+      last_ticks = ticks;
+      Uint32 ticks_per_frame = (Uint32) (TICKS_PER_FRAME * g_game_speed);
+
+      if (elapsed_ticks > ticks_per_frame*4)
+      {
+	// when the game loads up or levels are switched the
+	// elapsed_ticks grows extremely large, so we just ignore those
+	// large time jumps
+	elapsed_ticks = 0;
+      }
+
+      if (elapsed_ticks < ticks_per_frame)
+      {
+	Uint32 delay_ticks = ticks_per_frame - elapsed_ticks;
+	if (!Config::neat_headless_mode) {
+	  SDL_Delay(delay_ticks);
+	}
+	last_ticks += delay_ticks;
+	elapsed_ticks += delay_ticks;
+      }
+
+      int frames = 0;
+
+      while (elapsed_ticks >= ticks_per_frame && frames < MAX_FRAME_SKIP)
+      {
+	elapsed_ticks -= ticks_per_frame;
+	float timestep = 1.0 / LOGICAL_FPS;
+	real_time += timestep;
+	timestep *= m_speed;
+	game_time += timestep;
+
+	process_events();
+	update_gamelogic(timestep);
+	frames += 1;
+      }
+
+      if (!m_screen_stack.empty())
+      {
+	draw(context);
+      }
+
+      if (!Config::neat_headless_mode) {
+	SoundManager::current()->update();
+
+	handle_screen_switch();
+      }
     }
-
-    if (elapsed_ticks < ticks_per_frame)
-    {
-      Uint32 delay_ticks = ticks_per_frame - elapsed_ticks;
-      SDL_Delay(delay_ticks);
-      last_ticks += delay_ticks;
-      elapsed_ticks += delay_ticks;
-    }
-
-    int frames = 0;
-
-    while (elapsed_ticks >= ticks_per_frame && frames < MAX_FRAME_SKIP)
-    {
-      elapsed_ticks -= ticks_per_frame;
-      float timestep = 1.0 / LOGICAL_FPS;
+  } else {
+    float timestep = 1.0 / LOGICAL_FPS;
+    float timestep_plus = timestep * m_speed;
+    
+    while (!m_screen_stack.empty()) {
       real_time += timestep;
-      timestep *= m_speed;
-      game_time += timestep;
-
+      game_time += timestep_plus;
       process_events();
-      update_gamelogic(timestep);
-      frames += 1;
+      update_gamelogic(timestep_plus);
+      
+      if (!m_screen_stack.empty()) 
+      {
+	draw(context);
+      }
     }
-
-    if (!m_screen_stack.empty())
-    {
-      draw(context);
-    }
-
-    SoundManager::current()->update();
-
-    handle_screen_switch();
   }
 }
 

@@ -35,6 +35,7 @@ public:
     AUTO_VIDEO,
     OPENGL,
     PURE_SDL,
+    DUMMY,
     NUM_SYSTEMS
   };
 

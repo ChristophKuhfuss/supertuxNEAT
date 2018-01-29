@@ -21,7 +21,7 @@ void Sensor::update(float elapsed_time) {
   if (!sec->is_free_of_statics(lookahead)) { 			// Static obstacle
     value = 1;
     sprite->set_color(Color(0,0.8,0.2));
-  } else if (!sec->is_free_of_movingstatics(lookahead, tux)) {	// Second parameter is for ignoring tux
+  } else if (!sec->is_free_of_enemies(lookahead, tux)) {	// Second parameter is for ignoring tux
     value = -1;
     sprite->set_color(Color(0.8,0.2,0.2));
   } else {							// Else: nothing we currently care for

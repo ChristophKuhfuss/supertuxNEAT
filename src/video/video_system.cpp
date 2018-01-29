@@ -21,6 +21,8 @@
 
 #include "util/log.hpp"
 #include "video/sdl/sdl_video_system.hpp"
+#include "video/dummy/dummy_video_system.hpp"
+#include "supertux/gameconfig.hpp"
 
 #ifdef HAVE_OPENGL
 #include "video/gl/gl_video_system.hpp"
@@ -35,12 +37,12 @@ VideoSystem::create(VideoSystem::Enum video_system)
 #ifdef HAVE_OPENGL
       try
       {
-        return std::unique_ptr<VideoSystem>(new GLVideoSystem);
+	return std::unique_ptr<VideoSystem>(new GLVideoSystem);
       }
       catch(std::exception& err)
       {
-        log_warning << "Error creating GLVideoSystem, using SDL fallback: "  << err.what() << std::endl;
-        return std::unique_ptr<VideoSystem>(new SDLVideoSystem);
+	log_warning << "Error creating GLVideoSystem, using SDL fallback: "  << err.what() << std::endl;
+	return std::unique_ptr<VideoSystem>(new SDLVideoSystem);
       }
 #else
       log_info << "new SDL renderer\n";
@@ -58,6 +60,10 @@ VideoSystem::create(VideoSystem::Enum video_system)
     case PURE_SDL:
       log_info << "new SDL renderer\n";
       return std::unique_ptr<VideoSystem>(new SDLVideoSystem);
+      
+    case DUMMY:
+      log_info << "new Dummy renderer\n";
+      return std::unique_ptr<VideoSystem>(new DummyVideoSystem);
 
     default:
       assert(!"invalid video system in config");
@@ -81,13 +87,17 @@ VideoSystem::get_video_system(const std::string &video)
   else if(video == "sdl")
   {
     return PURE_SDL;
+  } 
+  else if(video == "dummy")
+  {
+    return DUMMY;
   }
   else
   {
 #ifdef HAVE_OPENGL
-    throw std::runtime_error("invalid VideoSystem::Enum, valid values are 'auto', 'sdl' and 'opengl'");
+    throw std::runtime_error("invalid VideoSystem::Enum, valid values are 'auto', 'sdl', 'dummy' and 'opengl'");
 #else
-    throw std::runtime_error("invalid VideoSystem::Enum, valid values are 'auto' and 'sdl'");
+    throw std::runtime_error("invalid VideoSystem::Enum, valid values are 'auto', 'dummy' and 'sdl'");
 #endif
   }
 }
@@ -103,6 +113,8 @@ VideoSystem::get_video_string(VideoSystem::Enum video)
       return "opengl";
     case PURE_SDL:
       return "sdl";
+    case DUMMY:
+      return "dummy";
     default:
       assert(!"invalid video system in config");
       return "auto";

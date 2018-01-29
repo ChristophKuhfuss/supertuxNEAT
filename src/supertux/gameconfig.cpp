@@ -28,6 +28,7 @@
 #include "supertux/globals.hpp"
 
 bool Config::neat_activated = false;
+bool Config::neat_headless_mode = false;
 
 Config::Config() :
   profile(1),
