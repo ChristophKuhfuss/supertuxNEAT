@@ -164,6 +164,8 @@ Config::load()
 void
 Config::save()
 {
+  if (Config::neat_activated || neat_headless_mode) return;		// This can lead to nasty errors like the game only starting in headless mode etc
+  
   Writer writer("config");
 
   writer.start_list("supertux-config");

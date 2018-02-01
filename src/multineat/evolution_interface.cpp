@@ -159,10 +159,6 @@ void EvolutionInterface::update_idle(float elapsed_time)
 
 void EvolutionInterface::timeout() 
 {
-  if (TuxEvolution::debug) {
-    std::cout << "Timeout occured!" << std::endl;
-  }
-  
   on_tux_death();
   
   cur_session->restart_level(false);

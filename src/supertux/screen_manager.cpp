@@ -400,9 +400,7 @@ ScreenManager::run(DrawingContext &context)
       if (elapsed_ticks < ticks_per_frame)
       {
 	Uint32 delay_ticks = ticks_per_frame - elapsed_ticks;
-	if (!Config::neat_headless_mode) {
-	  SDL_Delay(delay_ticks);
-	}
+	SDL_Delay(delay_ticks);
 	last_ticks += delay_ticks;
 	elapsed_ticks += delay_ticks;
       }
@@ -427,11 +425,9 @@ ScreenManager::run(DrawingContext &context)
 	draw(context);
       }
 
-      if (!Config::neat_headless_mode) {
-	SoundManager::current()->update();
+      SoundManager::current()->update();
 
-	handle_screen_switch();
-      }
+      handle_screen_switch();
     }
   } else {
     float timestep = 1.0 / LOGICAL_FPS;
