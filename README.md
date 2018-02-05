@@ -6,8 +6,16 @@ I added several additional console arguments for customization. Just use "./supe
 
 NOTE: Without specifying "--autosavegen", no output files will be produced and all progress will be lost if you terminate the program!
 
+Features:
+- NEAT experiments in SuperTux
+- You can watch the training visually or train headless for faster training times
+- Autosave every nth generation
+- Watch pretrained genomes from files
+- Select training levels or build your own one (this is originally a SuperTux feature)
+- Specify sensor parameters (see below, the current sensor model is bad)
+
 Currently known bugs:
-- Runs are NOT reproducable even when using seeds when initializing evolution. The first few generations will be identical, but after some point in time, the following will differ. This point is the same when the seed doesn't change, just the results after this point will be completely different.
+- Not really a bug, but the current sensor model sucks. It's HIGHLY sensitive to minor input changes and the experiment outcome will probably be completely different from there on. Also, the input structure itself isn't good for the given task, enemies are represented via a negative input, static objects as a positive input. This is the next point on my to-do list.
 
 # SuperTux
 
