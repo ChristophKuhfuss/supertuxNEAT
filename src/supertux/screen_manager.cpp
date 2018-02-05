@@ -53,7 +53,8 @@
 // static const Uint32 TICKS_PER_FRAME = (Uint32) (62.5 / LOGICAL_FPS);
 static const Uint32 TICKS_PER_FRAME = (Uint32) (1 / LOGICAL_FPS);	// For headless mode testing
 /** don't skip more than every 2nd frame */
-static const int MAX_FRAME_SKIP = 2;
+// static const int MAX_FRAME_SKIP = 2;
+static const int MAX_FRAME_SKIP = 10;
 
 ScreenManager::ScreenManager() :
   m_waiting_threads(),
@@ -380,70 +381,59 @@ ScreenManager::run(DrawingContext &context)
 
   handle_screen_switch();
 
-   if (!Config::neat_headless_mode) {
-    while (!m_screen_stack.empty())
+  while (!m_screen_stack.empty())
+  {
+    Uint32 ticks;
+    ticks = SDL_GetTicks();
+    elapsed_ticks += ticks - last_ticks;
+    last_ticks = ticks;
+    Uint32 ticks_per_frame = (Uint32) (TICKS_PER_FRAME * g_game_speed);
+
+    if (elapsed_ticks > ticks_per_frame*4)
     {
-      Uint32 ticks;
-      ticks = SDL_GetTicks();
-      elapsed_ticks += ticks - last_ticks;
-      last_ticks = ticks;
-      Uint32 ticks_per_frame = (Uint32) (TICKS_PER_FRAME * g_game_speed);
-
-      if (elapsed_ticks > ticks_per_frame*4)
-      {
-	// when the game loads up or levels are switched the
-	// elapsed_ticks grows extremely large, so we just ignore those
-	// large time jumps
-	elapsed_ticks = 0;
-      }
-
-      if (elapsed_ticks < ticks_per_frame)
-      {
-	Uint32 delay_ticks = ticks_per_frame - elapsed_ticks;
-	SDL_Delay(delay_ticks);
-	last_ticks += delay_ticks;
-	elapsed_ticks += delay_ticks;
-      }
-
-      int frames = 0;
-
-      while (elapsed_ticks >= ticks_per_frame && frames < MAX_FRAME_SKIP)
-      {
-	elapsed_ticks -= ticks_per_frame;
-	float timestep = 1.0 / LOGICAL_FPS;
-	real_time += timestep;
-	timestep *= m_speed;
-	game_time += timestep;
-
-	process_events();
-	update_gamelogic(timestep);
-	frames += 1;
-      }
-
-      if (!m_screen_stack.empty())
-      {
-	draw(context);
-      }
-
-      SoundManager::current()->update();
-
-      handle_screen_switch();
+      // when the game loads up or levels are switched the
+      // elapsed_ticks grows extremely large, so we just ignore those
+      // large time jumps
+      elapsed_ticks = 0;
     }
-  } else {
-    float timestep = 1.0 / LOGICAL_FPS;
-    float timestep_plus = timestep * m_speed;
-    
-    while (!m_screen_stack.empty()) {
+
+    // Delays are a no-no when training in headless mode
+    if (elapsed_ticks < ticks_per_frame && !Config::neat_headless_mode)
+    {
+      Uint32 delay_ticks = ticks_per_frame - elapsed_ticks;
+      SDL_Delay(delay_ticks);
+      last_ticks += delay_ticks;
+      elapsed_ticks += delay_ticks;
+    }
+
+    int frames = 0;
+
+    while (elapsed_ticks >= ticks_per_frame && frames < MAX_FRAME_SKIP)
+    {
+      elapsed_ticks -= ticks_per_frame;
+      float timestep = 1.0 / LOGICAL_FPS;
       real_time += timestep;
-      game_time += timestep_plus;
+      timestep *= m_speed;
+      game_time += timestep;
+
       process_events();
-      update_gamelogic(timestep_plus);
-      
-      if (!m_screen_stack.empty()) 
-      {
-	draw(context);
-      }
+      update_gamelogic(timestep);
+      frames += 1;
     }
+
+    if (!m_screen_stack.empty())
+    {
+      draw(context);
+    }
+    
+    // We don't care about sounds when doing science
+    if (!Config::neat_activated) {
+      SoundManager::current()->update();
+    }
+    
+    // In SuperTuxNEAT this isn't really needed for consistency
+    // but prevents an exception when the experiment finishes
+    handle_screen_switch();
   }
 }
 
