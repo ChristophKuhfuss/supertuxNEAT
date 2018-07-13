@@ -4,7 +4,10 @@ To start the evolutionary process, compile SuperTux as usual (check the SuperTux
 
 I added several additional console arguments for customization. Just use "./supertux2 --help" after building to display all available options.
 
+Note that this project needs sqlite3.
+
 NOTE: Without specifying "--autosavegen", no output files will be produced and all progress will be lost if you terminate the program!
+The console arguments that are NOT displayed when starting the program with the "--help" option are not made for humans and should primarily be used by the "stneatexperiment" program (see other repo) or for debugging purposes.
 
 Features:
 - NEAT experiments in SuperTux
@@ -12,10 +15,11 @@ Features:
 - Autosave every nth generation
 - Watch pretrained genomes from files
 - Select training levels or build your own one (this is originally a SuperTux feature)
-- Specify sensor parameters (see below, the current sensor model is bad)
+- Specify sensor parameters
+- Create own experiment parameter files for sensor and experiment configuration
 
-Currently known bugs:
-- Not really a bug, but the current sensor model sucks. It's HIGHLY sensitive to minor input changes and the experiment outcome will probably be completely different from there on. Also, the input structure itself isn't good for the given task, enemies are represented via a negative input, static objects as a positive input. This is the next point on my to-do list.
+To do:
+I'm still unsure whether to keep this project able to be run as a standalone or if I should remove that functionality. It's intended to be run by "stneatexperiment" now since there you can configure multiple cores for example.
 
 # SuperTux
 
