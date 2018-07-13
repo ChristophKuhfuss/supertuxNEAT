@@ -1,0 +1,14 @@
+(supertux-sprite
+  (action
+    (name "default")
+    (images "sensor.png")
+  )
+  (action
+    (name "badguy")
+    (images "sensor_red.png")
+  )
+  (action
+    (name "solid")
+    (images "sensor_green.png")
+  )
+)

@@ -28,9 +28,8 @@
 #include "supertux/player_status.hpp"
 #include "util/currenton.hpp"
 #include "supertux/game_object_ptr.hpp"
-#include "multineat/evolution_interface.hpp"
 #include "multineat/tux_evolution.hpp"
-#include "multineat/sensor.hpp"
+#include "multineat/sensors/sensor.hpp"
 
 class CodeController;
 class DrawingContext;
@@ -39,6 +38,7 @@ class Sector;
 class Statistics;
 class Savegame;
 class EvolutionInterface;
+class SensorManager;
 /**
  * Screen that runs a Level, where Players run and jump through Sectors.
  */
@@ -163,6 +163,7 @@ private:
   bool end_seq_started;
   
   std::shared_ptr<EvolutionInterface> evo_interface;
+  std::shared_ptr<SensorManager> sensor_manager;
 
 private:
   GameSession(const GameSession&);

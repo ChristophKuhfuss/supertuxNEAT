@@ -11,24 +11,27 @@
 #include "supertux/collision_hit.hpp"
 #include "supertux/game_object.hpp"
 
+#include <vector>
+
 class Sensor : public GameObject {
+  friend class ExperimentParameterParser;
+  
 public:
   Sensor(Sector* sec, int offsetX, int offsetY);
   
-private:
+protected:
   Sector* sec;
   Player* tux;
   SpritePtr sprite;
-  int offsetX;
-  int offsetY;
+  Vector offset;
   double value;
   
 public:
-  void update(float elapsed_time);
-  void draw(DrawingContext& context);
-  double getValue();
-  void save(Writer& writer);
-  ObjectSettings get_settings();
+  virtual void update(float elapsed_time);
+  virtual void draw(DrawingContext& context);
+  double getValue() { return value; };
+  void save(Writer& writer) { GameObject::save(writer); };
+  ObjectSettings get_settings() { return GameObject::get_settings(); };
 };
 
 #endif /* HEADER_SENSOR */

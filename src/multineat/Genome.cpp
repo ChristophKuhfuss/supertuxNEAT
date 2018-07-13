@@ -124,8 +124,8 @@ Genome::Genome(unsigned int a_ID,
                const Parameters& a_Parameters)
 {
     ASSERT((a_NumInputs > 1) && (a_NumOutputs > 0));
-    RNG t_RNG;
-    t_RNG.TimeSeed();
+//     RNG t_RNG;
+//     t_RNG.TimeSeed();
 
     m_ID = a_ID;
     int t_innovnum = 1, t_nnum = 1;
@@ -250,12 +250,12 @@ Genome::Genome(unsigned int a_ID,
             // Also connect the bias to every output
             for(unsigned int i=0; i < a_NumOutputs; i++)
             {
-                int t_inp_id  = t_RNG.RandInt(1, a_NumInputs-1);
+//                 int t_inp_id  = t_RNG.RandInt(1, a_NumInputs-1);
                 int t_bias_id = a_NumInputs;
                 int t_outp_id = a_NumInputs+1 + i;
 
                 // created with zero weights. needs future random initialization. !!!!!!!!
-                m_LinkGenes.push_back( LinkGene(t_inp_id, t_outp_id,  t_innovnum, 0.0, false) );
+//                 m_LinkGenes.push_back( LinkGene(t_inp_id, t_outp_id,  t_innovnum, 0.0, false) );
                 t_innovnum++;
                 m_LinkGenes.push_back( LinkGene(t_bias_id, t_outp_id, t_innovnum, 0.0, false) );
                 t_innovnum++;

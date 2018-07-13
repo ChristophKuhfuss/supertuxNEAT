@@ -6,7 +6,8 @@
 #define HEADER_EVOLUTION_INTERFACE
 
 #include "tux_evolution.hpp"
-#include "sensor.hpp"
+#include "sensors/sensor.hpp"
+#include "sensors/sensormanager.hpp"
 #include "supertux/game_object.hpp"
 #include "supertux/sector.hpp"
 #include "supertux/game_session.hpp"
@@ -17,28 +18,35 @@
 using namespace NEAT;
 
 class GameSession;
+class SensorManager;
 
 class EvolutionInterface : public GameObject
 {
-public:
-  static constexpr float TIMEOUT = 1.0f;
-  static constexpr float FITNESS_TIMEOUT = 3.0f;
-  static constexpr float SEND_THRESHOLD = 0.6;
+  friend class ExperimentParameterParser;
+  friend class CommandLineArguments;
+  
+private:
+  static float TIMEOUT;
+  static float FITNESS_TIMEOUT;
+  static float SEND_THRESHOLD;
+  
 private:
   GameSession* cur_session;
   Sector* cur_sector;
   Player* tux;
+  std::shared_ptr<SensorManager> sensor_manager;
   std::unique_ptr<CodeController> controller;
   double* sensorValues;
-  vector<std::shared_ptr<Sensor>> sensors;
+  std::vector<std::shared_ptr<Sensor>>* sensors;
   NeatOutputs outputs;
   TuxEvolution neat;
   Vector last_known_playerpos;
   float idle;
   float fitness_idle;
   float max_x;
+  
 public:
-  EvolutionInterface(GameSession* session);
+  EvolutionInterface(GameSession* session, std::shared_ptr<SensorManager> sensor_manager);
   ~EvolutionInterface();
   void update(float elapsed_time);
   void draw(DrawingContext& context);
@@ -48,6 +56,7 @@ public:
   ObjectSettings get_settings();
   void add_sensor(std::shared_ptr<Sensor> s);
   void init();
+  
 private:
   void send_inputs(NeatInputs inputs);
   NeatInputs generate_inputs();

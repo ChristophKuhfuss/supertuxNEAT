@@ -1,4 +1,4 @@
-//  SuperTux
+// //  SuperTux
 //  Copyright (C) 2006 Matthias Braun <matze@braunis.de>
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -48,7 +48,15 @@
 #include "util/file_system.hpp"
 #include "util/gettext.hpp"
 #include "worldmap/worldmap.hpp"
-#include <multineat/tux_evolution.hpp>
+
+#include "multineat/tux_evolution.hpp"
+#include "multineat/evolution_interface.hpp"
+#include "multineat/sensors/rangefindersensor.hpp"
+#include "multineat/sensors/depthfindersensor.hpp"
+#include "multineat/sensors/pieslicesensor.hpp"
+#include "multineat/sensors/sensormanager.hpp"
+
+#include <math.h>
 
 #ifdef WIN32
 #  define snprintf _snprintf
@@ -88,7 +96,8 @@ GameSession::GameSession(const std::string& levelfile_, Savegame& savegame, Stat
   end_seq_started(false)
 {
   if (Config::neat_activated) {
-    evo_interface = std::make_shared<EvolutionInterface>(this);
+    sensor_manager = std::make_shared<SensorManager>(this);
+    evo_interface = std::make_shared<EvolutionInterface>(this, sensor_manager);
   }
   
   if (restart_level() != 0)
@@ -199,17 +208,21 @@ GameSession::restart_level(bool after_death)
     evo_interface->init();
     currentsector->add_object(evo_interface);
     
-    int middle = (TuxEvolution::sensor_grid_padding * TuxEvolution::sensor_grid_size) / 2;
-    for (int i = 0; i < TuxEvolution::sensor_grid_size; i++) {
-      for (int j = 0; j < TuxEvolution::sensor_grid_size; j++) {
-	std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(currentsector, i * TuxEvolution::sensor_grid_padding - middle, 
-	  j * TuxEvolution::sensor_grid_padding - middle);
-	currentsector->add_object(sensor);
-	evo_interface->add_sensor(sensor);
-      }
-    }
+//     int middle = (TuxEvolution::sensor_grid_padding * TuxEvolution::sensor_grid_size) / 2;
+//     for (int i = 0; i < TuxEvolution::sensor_grid_size; i++) {
+//       for (int j = 0; j < TuxEvolution::sensor_grid_size; j++) {
+// 	std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(currentsector, i * TuxEvolution::sensor_grid_padding - middle, 
+// 	  j * TuxEvolution::sensor_grid_padding - middle);
+// 	currentsector->add_object(sensor);
+// 	evo_interface->add_sensor(sensor);
+//       }
+//     }
   }
-    
+  
+  SensorManager sm(this);
+  
+  sm.initSensors();
+  
   return (0);
 }
 

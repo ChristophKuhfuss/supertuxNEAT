@@ -405,7 +405,7 @@ ENDIF(WIN32)
 
 FILE(GLOB SUPERTUX_SOURCES_C RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} external/obstack/*.c external/findlocale/findlocale.c)
 
-FILE(GLOB SUPERTUX_SOURCES_CXX RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*/*.cpp src/supertux/menu/*.cpp src/video/sdl/*.cpp src/video/dummy/*.cpp)
+FILE(GLOB SUPERTUX_SOURCES_CXX RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*/*.cpp src/supertux/menu/*.cpp src/multineat/*.cpp src/multineat/sensors/*.cpp src/video/sdl/*.cpp src/video/dummy/*.cpp)
 FILE(GLOB SUPERTUX_RESOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${PROJECT_BINARY_DIR}/tmp/*.rc")
 
 IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/external/sexp-cpp/CMakeLists.txt)
@@ -465,6 +465,9 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
       message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
     endif(COMPILER_SUPPORTS_CXX0X)
   endif(COMPILER_SUPPORTS_CXX11)
+
+  ## We need pthread
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
   SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "Debug flags")
   SET(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "Debug flags")
@@ -599,6 +602,8 @@ target_link_libraries(supertux2 supertux2_lib)
 set_target_properties(supertux2 PROPERTIES OUTPUT_NAME supertux2)
 set_target_properties(supertux2_lib PROPERTIES OUTPUT_NAME supertux2)
 set_target_properties(supertux2_lib PROPERTIES COMPILE_FLAGS "${SUPERTUX2_EXTRA_WARNING_FLAGS}")
+
+target_link_libraries(supertux2 sqlite3)
 
 IF(WIN32)
   ## Copy dlls on windows
@@ -829,6 +834,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT DISABLE_CPACK_BUNDLING)
     SET(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_CURRENT_SOURCE_DIR}/tools/darwin/background.png")
 ENDIF()
 
+find_package(sqlite3)
+if (SQLITE3_FOUND)
+	include_directories(${SQLITE3_INCLUDE_DIRS})
+endif()
 
 
 SET(CPACK_PACKAGE_NAME "SuperTux")
@@ -931,3 +940,5 @@ MARK_AS_ADVANCED(
   PHYSFS_INCLUDE_DIR
   PHYSFS_LIBRARY
 )
+
+add_subdirectory(src/multineat/sensors)

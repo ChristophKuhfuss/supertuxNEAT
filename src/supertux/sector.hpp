@@ -45,6 +45,7 @@ class Portable;
 class DrawingContext;
 class DisplayEffect;
 class ReaderMapping;
+class BadGuy;
 
 enum MusicType {
   LEVEL_MUSIC,
@@ -146,6 +147,13 @@ public:
    * Note that this does not include static objects, e.g. bonus blocks.
    */
   bool is_free_of_tiles(const Rectf& rect, const bool ignoreUnisolid = false) const;
+  
+  /**
+   * Checks if the specified rectangle is free of hurting tiles
+   * Hurting tiles can be non-solid
+   */
+  bool is_free_of_hurting_tiles(const Rectf& rect, const bool ignoreUnisolid = false) const;
+  
   /**
    * Checks if the specified rectangle is free of both
    * 1.) solid tiles and
@@ -180,6 +188,8 @@ public:
   }
 
   std::vector<MovingObject*> get_nearby_objects (const Vector& center, float max_distance) const;
+  
+  std::vector<BadGuy*> get_nearby_enemies(const Vector& center, float max_distance) const;
 
   Rectf get_active_region() const;
 

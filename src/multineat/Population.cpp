@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <stdio.h>
 
 #include "Genome.h"
 #include "Species.h"
@@ -139,11 +140,27 @@ Population::Population(const char *a_FileName)
     m_InnovationDatabase.Init(t_DataFile);
 
     // Load all genomes
-    for(unsigned int i=0; i<m_Parameters.PopulationSize; i++)
+    /*for(unsigned int i=0; i<m_Parameters.PopulationSize; i++)
     {
         Genome t_genome(t_DataFile);
         m_Genomes.push_back( t_genome );
+    }*/
+    
+    // Fix a bug where populations with more than PopulationSize genomes wouldn't get parsed correctly
+    while(t_DataFile.peek() != EOF)
+    {
+      streampos sp = t_DataFile.tellg();
+      
+      string line;
+      t_DataFile >> line;
+      
+      if (line == "GenomeStart") {
+	t_DataFile.seekg(sp);
+	Genome t_genome(t_DataFile);
+	m_Genomes.push_back( t_genome );
+      }
     }
+    
     t_DataFile.close();
 
     m_NextGenomeID = 0;

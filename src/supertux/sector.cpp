@@ -36,6 +36,7 @@
 #include "object/smoke_cloud.hpp"
 #include "object/text_object.hpp"
 #include "object/tilemap.hpp"
+#include <object/growup.hpp>
 #include "physfs/ifile_streambuf.hpp"
 #include "supertux/collision.hpp"
 #include "supertux/constants.hpp"
@@ -349,7 +350,13 @@ Sector::get_foremost_layer() const
 void
 Sector::update(float elapsed_time)
 {
-  //print_gameobject_statistics();
+//   for (const auto& object : gameobjects) {
+//     if (BadGuy* bg = dynamic_cast<BadGuy*>(object.get())) {
+//       std::cerr << bg->get_class() << " " << bg->get_pos() << std::endl;
+//     } else if (GrowUp* gu = dynamic_cast<GrowUp*>(object.get())) {
+//       std::cerr << "GU " << gu->get_pos() <<", bbox: "<< gu->get_bbox() << std::endl;
+//     }
+//   }
 
   player->check_bounds();
 
@@ -1093,6 +1100,41 @@ Sector::is_free_of_tiles(const Rectf& rect, const bool ignoreUnisolid) const
   return true;
 }
 
+
+bool Sector::is_free_of_hurting_tiles(const Rectf& rect, const bool ignoreUnisolid) const
+{
+  using namespace collision;
+
+  for(const auto& solids : solid_tilemaps) {
+    // test with all tiles in this rectangle
+    Rect test_tiles = solids->get_tiles_overlapping(rect);
+
+    for(int x = test_tiles.left; x < test_tiles.right; ++x) {
+      for(int y = test_tiles.top; y < test_tiles.bottom; ++y) {
+        const auto& tile = solids->get_tile(x, y);
+        if(!tile) continue;
+        if(!(tile->getAttributes() & Tile::HURTS))
+          continue;
+        if(tile->is_unisolid () && ignoreUnisolid)
+          continue;
+        if(tile->is_slope ()) {
+          AATriangle triangle;
+          Rectf tbbox = solids->get_tile_bbox(x, y);
+          triangle = AATriangle(tbbox, tile->getData());
+          Constraints constraints;
+          if(!collision::rectangle_aatriangle(&constraints, rect, triangle))
+            continue;
+        }
+        // We have a hurting tile that overlaps the given rectangle.
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+
 bool
 Sector::is_free_of_statics(const Rectf& rect, const MovingObject* ignore_object, const bool ignoreUnisolid) const
 {
@@ -1145,7 +1187,6 @@ bool Sector::is_free_of_enemies(const Rectf& rect, const MovingObject* ignore_ob
         || (moving_object->get_group() == COLGROUP_MOVING_STATIC)
         || (moving_object->get_group() == COLGROUP_STATIC)) {
       if(intersects(rect, moving_object->get_bbox())) {
-	Rectf r = moving_object->get_bbox();
 	return false;
       }
     }
@@ -1419,6 +1460,24 @@ Sector::get_nearby_objects (const Vector& center, float max_distance) const
 
   return (ret);
 }
+
+std::vector<BadGuy*> Sector::get_nearby_enemies(const Vector& center, float max_distance) const
+{
+  std::vector<BadGuy*> ret;
+ 
+  for(const auto& object : gameobjects) {
+    auto badguy = dynamic_cast<BadGuy*>(object.get());
+    if (!badguy) continue;
+    
+    float distance = badguy->get_bbox().distance(center);
+    if (distance <= max_distance)
+      ret.push_back(badguy);
+  }
+  
+  return (ret);
+}
+
+
 
 void
 Sector::stop_looping_sounds()

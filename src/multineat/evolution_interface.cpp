@@ -1,10 +1,16 @@
 #include "evolution_interface.hpp"
 #include <supertux/gameconfig.hpp>
 
-EvolutionInterface::EvolutionInterface(GameSession* session) :
+float EvolutionInterface::TIMEOUT = 1.0f;
+float EvolutionInterface::FITNESS_TIMEOUT = 3.0f;
+float EvolutionInterface::SEND_THRESHOLD = 0.7f;
+
+EvolutionInterface::EvolutionInterface(GameSession* session, std::shared_ptr<SensorManager> sensor_manager) :
 cur_session(session),
-sensorValues(new double[TuxEvolution::sensor_grid_size * TuxEvolution::sensor_grid_size]),
-neat(),
+sensor_manager(sensor_manager),
+sensors(sensor_manager->get_cur_sensors()),
+sensorValues(new double[SensorManager::get_total_sensor_count()]),
+neat(),			// will not be instantiated in this class anymore but from the outside
 controller(new CodeController),
 max_x()
 {
@@ -13,6 +19,7 @@ max_x()
 EvolutionInterface::~EvolutionInterface()
 {
   delete[] sensorValues;
+  controller.reset();
 }
 
 void EvolutionInterface::init()
@@ -20,6 +27,7 @@ void EvolutionInterface::init()
   cur_sector = cur_session->get_current_sector();
   tux = cur_sector->player;
   tux->set_controller(controller.get());
+  sensor_manager->initSensors();
 }
 
 
@@ -41,9 +49,9 @@ void EvolutionInterface::update(float elapsed_time)
 NeatInputs EvolutionInterface::generate_inputs()
 {
     vector<double> inputs;
-    std::vector<std::shared_ptr<Sensor>>::iterator it = sensors.begin();
+    std::vector<std::shared_ptr<Sensor>>::iterator it = sensors->begin();
     
-    for (it = sensors.begin(); it != sensors.end(); ++it) {
+    for (it = sensors->begin(); it != sensors->end(); ++it) {
       inputs.push_back((*it)->getValue());
     }
         
@@ -107,7 +115,7 @@ void EvolutionInterface::send_outputs()
     controller->press(Controller::ACTION);
   }
   
-  if (outputs.action >= SEND_THRESHOLD) {
+  if (outputs.jump >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
       std::cerr << "Button:J" << std::endl;
     }
@@ -121,7 +129,7 @@ void EvolutionInterface::on_tux_death()
     std::cerr << "-------------------------------" << std::endl;
   }
   
-  sensors.clear();
+  sensor_manager->clearSensors();
   controller->reset();
   
   if (!neat.on_tux_death(tux->get_pos().x)) {
@@ -137,6 +145,8 @@ void EvolutionInterface::on_level_won()
 {
   std::cout << "Organism #" << neat.get_current_genome_id() << " finished the level!" << std::endl;
   neat.on_level_won();
+  on_tux_death();
+  cur_session->restart_level(false);
 }
 
 
@@ -166,7 +176,7 @@ void EvolutionInterface::timeout()
 
 void EvolutionInterface::add_sensor(std::shared_ptr<Sensor> s)
 {
-  sensors.push_back(s);
+  sensors->push_back(s);
 }
 
 
@@ -183,8 +193,8 @@ void EvolutionInterface::save(Writer& writer)
 void EvolutionInterface::debug_print()
 {
   std::cerr << "Tux:" << tux->get_pos().x << "," << tux->get_pos().y << std::endl;
-  for (int i = 0; i < sensors.size(); i++) {
-    Sensor s = *sensors[i];
+  for (int i = 0; i < sensors->size(); i++) {
+    Sensor s = *((*sensors)[i]);
     std::cerr << s.getValue();
   }
   

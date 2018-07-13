@@ -64,6 +64,8 @@ extern "C" {
 #include "video/renderer.hpp"
 #include "worldmap/worldmap.hpp"
 
+#include "multineat/ExperimentParameterParser.hpp"
+
 class ConfigSubsystem
 {
 public:
@@ -355,45 +357,37 @@ Main::launch_game()
 
   SDLSubsystem sdl_subsystem;
   ConsoleBuffer console_buffer;
-  std::cout << "Initialized subsystem and console buffer..." << std::endl;
   timelog("controller");
   InputManager input_manager(g_config->keyboard_config, g_config->joystick_config);
-  std::cout << "Initialized input manager..." << std::endl;
   timelog("commandline");
 
   timelog("video");
   std::unique_ptr<VideoSystem> video_system = VideoSystem::create(g_config->video);
-  std::cout << "Initialized video system..." << std::endl;
   DrawingContext context(*video_system);
-  std::cout << "Initialized drawing context..." << std::endl;
   
-//   if (!Config::neat_headless_mode)
   init_video();
-  std::cout << "init_video() successful" << std::endl;
 
   timelog("audio");
   SoundManager sound_manager;
-  sound_manager.enable_sound(g_config->sound_enabled);
-  sound_manager.enable_music(g_config->music_enabled);
-
-  std::cout << "Initialized sound manager..." << std::endl;
+  
+  if (!Config::neat_activated) {
+    sound_manager.enable_sound(g_config->sound_enabled);
+    sound_manager.enable_music(g_config->music_enabled);
+  } else {
+    sound_manager.enable_sound(false);
+    sound_manager.enable_music(false);
+  }
   
   Console console(console_buffer);
-  std::cout << "Initialized console..." << std::endl;
   
   timelog("scripting");
   scripting::Scripting scripting(g_config->enable_script_debugger);
   
-  std::cout << "Initialized scripting..." << std::endl;
-
   timelog("resources");
   TileManager tile_manager;
-  std::cout << "Initialized tile manager..." << std::endl;
   SpriteManager sprite_manager;
-  std::cout << "Initialized sprite manager..." << std::endl;
   
   Resources resources;
-  std::cout << "Initialized resources..." << std::endl;
   
   timelog("addons");
   AddonManager addon_manager("addons", g_config->addons);
@@ -404,6 +398,17 @@ Main::launch_game()
 
   GameManager game_manager;
   ScreenManager screen_manager;
+  
+  if (Config::neat_experimentparamfile != "") {
+    ExperimentParameterParser parser(Config::neat_experimentparamfile);
+    parser.load();
+  } 
+  
+  //evo.run_parallel_evolution();
+  /* TO BE REMOVED; TESTING PURPOSES ONLY*/
+
+  
+  //return;
 
   if(!g_config->start_level.empty()) {
     // we have a normal path specified at commandline, not a physfs path.
@@ -468,8 +473,6 @@ Main::launch_game()
 void
 Main::launch_evolution()
 {
-  std::cout << "SuperTux + NEAT interface and experiment code by Christoph Kuhfuss 2017" << std::endl;
-  std::cout << "Using the original SuperTux source and the MultiNEAT framework by Peter Chervenski (https://github.com/peter-ch/MultiNEAT)" << std::endl;
   g_config->neat_activated = true;
   launch_game();
 }

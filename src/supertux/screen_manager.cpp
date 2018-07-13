@@ -49,12 +49,9 @@
 #endif
 
 /** ticks (as returned from SDL_GetTicks) per frame */
-// static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
-// static const Uint32 TICKS_PER_FRAME = (Uint32) (62.5 / LOGICAL_FPS);
-static const Uint32 TICKS_PER_FRAME = (Uint32) (1 / LOGICAL_FPS);	// For headless mode testing
+static Uint32 TICKS_PER_FRAME = (Uint32) (1000 / LOGICAL_FPS);
 /** don't skip more than every 2nd frame */
-// static const int MAX_FRAME_SKIP = 2;
-static const int MAX_FRAME_SKIP = 10;
+static const int MAX_FRAME_SKIP = 2;
 
 ScreenManager::ScreenManager() :
   m_waiting_threads(),
@@ -69,6 +66,8 @@ ScreenManager::ScreenManager() :
 {
   using namespace scripting;
   TimeScheduler::instance = new TimeScheduler();
+  
+  if (Config::neat_headless_mode) TICKS_PER_FRAME = 0;
 }
 
 ScreenManager::~ScreenManager()
@@ -421,7 +420,7 @@ ScreenManager::run(DrawingContext &context)
       frames += 1;
     }
 
-    if (!m_screen_stack.empty())
+    if (!m_screen_stack.empty() && !Config::neat_headless_mode)
     {
       draw(context);
     }

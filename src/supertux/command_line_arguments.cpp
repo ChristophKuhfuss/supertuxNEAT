@@ -28,6 +28,7 @@
 #include "version.h"
 #include "math/vector.hpp"
 #include "multineat/tux_evolution.hpp"
+#include "multineat/evolution_interface.hpp"
 
 CommandLineArguments::CommandLineArguments() :
   m_action(NO_ACTION),
@@ -114,14 +115,12 @@ CommandLineArguments::print_help(const char* arg0) const
 	    << _(     "NEAT options:") << "\n"
 	    << _(     "  --neat                       Activate NEAT") << "\n"
 	    << _(     "  --headless                   Start evolution in headless mode") << "\n"
-	    << _(     "  --maxgens NUM                Use NUM to specify the last generation ID") << "\n"
 	    << _(     "  --popfile FILE               Load population from file") << "\n"
-	    << _(     "  --paramfile FILE             Load population from file") << "\n"
-	    << _(     "  --randseed SEED              Use SEED for random number generation. Cannot specify this if population ist loaded from file") << "\n"
+	    << _(     "  --paramfile FILE             Load MultiNEAT parameters from file") << "\n"
+	    << _(     "  --experimentparamfile FILE   Load experiment parameters from file") << "\n"
 	    << _(     "  --sensorgridsize SIZE        Sets the sensor grid size to SIZE") << "\n"
 	    << _(     "  --sensorgridpadding PADDING  Sets the sensor grid padding to PADDING") << "\n"
-	    << _(     "  --autosavegen INTERVAL       Autosave generation every INTERVAL generations. File format is neat_gen<gen_id>") << "\n"
-	    << _(     "  --viewgenome ID              View genome with ID. No evolution, just playback") << "\n" << "\n"
+	    << _(     "  --viewgenome ID              View genome with ID. No evolution, just playback. Needs a proper population file") << "\n" << "\n"
 	    << _(     "Environment variables:") << "\n"
             << _(     "  SUPERTUX2_USER_DIR           Directory for user data (savegames, etc.)" ) << "\n"
             << _(     "  SUPERTUX2_DATA_DIR           Directory for the games datafiles" ) << "\n"<< "\n"
@@ -140,6 +139,8 @@ CommandLineArguments::print_version() const
 void
 CommandLineArguments::parse_args(int argc, char** argv)
 {
+  Config::neat_headless_mode = true;
+  
   for(int i = 1; i < argc; ++i)
   {
     std::string arg = argv[i];
@@ -392,7 +393,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	start_level = "../data/levels/world1/01 - Welcome to Antarctica.stl";
       } 
     }
-    else if (arg == "--headless")
+    else if (arg == "--visualmode")
     {
       if (m_action != START_EVOLUTION) 
       {
@@ -400,7 +401,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
       }
       
       m_action = START_EVOLUTION;
-      Config::neat_headless_mode = true;
+      Config::neat_headless_mode = false;
     }
     else if (arg == "--sensorgridsize")
     {
@@ -450,43 +451,12 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Please specify a seed integer after using --sensorgridpadding");
       }
     }
-    else if (arg == "--randseed")
-    {
-      if (m_action != START_EVOLUTION) 
-      {
-	throw std::runtime_error("Need to specify NEAT usage before setting a random seed");
-      }
-      else 
-      {
-	if (strcmp(TuxEvolution::filename, "") != 0) 
-	{
-	  throw std::runtime_error("Cannot specify a seed when loading population from file");
-	}
-	int seed = 0;
-	if (i + 1 < argc && sscanf(argv[i + 1], "%d", &seed) == 1) 
-	{
-	  TuxEvolution::using_seed = true;
-	  TuxEvolution::seed = seed;
-	  ++i;
-	} 
-	else 
-	{
-	  throw std::runtime_error("Please specify a seed integer after using --seed");
-	}
-      }
-    }
     else if (arg == "--popfile")
     {
       if (m_action != START_EVOLUTION) 
       {
 	throw std::runtime_error("Need to specify NEAT usage before specifying a population filename");
-      }
-      
-      /*if (TuxEvolution::custom_sensor_grid)
-      {
-	throw std::runtime_error("Cannot load population from file when sensor settings are modified");
-      }*/
-      
+      }      
       
       if (i + 1 >= argc || argv[i + 1][0] == '-') 
       {
@@ -506,59 +476,27 @@ CommandLineArguments::parse_args(int argc, char** argv)
       
       if (i + 1 >= argc || argv[i + 1][0] == '-') 
       {
-	throw std::runtime_error("Need to specify a parameter file after using --paramfilename");
+	throw std::runtime_error("Need to specify a parameter file after using --paramfile");
       }
       else
       {
 	TuxEvolution::paramfilename = argv[++i];
       }
     }
-    else if (arg == "--autosavegen")
+    else if (arg == "--experimentparamfile")
     {
-      if (m_action != START_EVOLUTION) {
-	throw std::runtime_error("Need to specify NEAT usage before specifying autosave interval");
+      if (m_action != START_EVOLUTION) 
+      {
+	throw std::runtime_error("Need to specify NEAT usage before specifying an experiment parameter filename");
       }
       
-      int autosave = 0;
-      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &autosave) == 1) 
+      if (i + 1 >= argc || argv[i + 1][0] == '-') 
       {
-	if (autosave > 0) 
-	{
-	  TuxEvolution::autosave_interval = autosave;
-	  ++i;
-	}
-	else
-	{
-	  throw std::runtime_error("Autosave interval must be > 0");
-	}
+	throw std::runtime_error("Need to specify an experiment parameter file after using --experimentparamfile");
       }
       else
       {
-	throw std::runtime_error("Need to specify an interval > 0 after --autosavegen");
-      }
-    }
-    else if (arg == "--maxgens")
-    {
-      if (m_action != START_EVOLUTION) {
-	throw std::runtime_error("Need to specify NEAT usage before specifying max gen id");
-      }
-      
-      int maxgens = 0;
-      if (i + 1 < argc && sscanf(argv[i + 1], "%d", &maxgens) == 1) 
-      {
-	if (maxgens > 0) 
-	{
-	  TuxEvolution::max_gens = maxgens;
-	  ++i;
-	}
-	else
-	{
-	  throw std::runtime_error("Max generation must be > 0");
-	}
-      }
-      else
-      {
-	throw std::runtime_error("Need to specify an integer > 0 after --maxgens");
+	Config::neat_experimentparamfile = argv[++i];
       }
     }
     else if (arg == "--viewgenome")
@@ -567,14 +505,12 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Need to specify NEAT usage before viewing single genomes");
       }
       
-      if (Config::neat_headless_mode) {
-	throw std::runtime_error("Cannot view genomes in headless mode");
-      }
-      
       if (strcmp(TuxEvolution::filename, "") == 0) 
       {
 	throw std::runtime_error("Cannot specify a genome to view without loading population from file");
       }
+      
+      Config::neat_headless_mode = false;
       
       int genomeid = -1;
       if (i + 1 < argc && sscanf(argv[i + 1], "%d", &genomeid) == 1) 
@@ -588,6 +524,68 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	else
 	{
 	  throw std::runtime_error("Genome ID must be >= 0");
+	}
+      }
+    }
+    else if (arg == "--fromtogenome")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before setting genomes to evaluate");
+      }
+      
+      if (strcmp(TuxEvolution::filename, "") == 0) 
+      {
+	throw std::runtime_error("Cannot specify genomes to evaluate without loading population from file");
+      }
+      
+      int fromgenomeid = -1;
+      int togenomeid = -1;
+      if ((i + 1 < argc && sscanf(argv[i + 1], "%d", &fromgenomeid) == 1) && (i + 2 < argc && sscanf(argv[i + 2], "%d", &togenomeid) == 1))
+      {
+	if (fromgenomeid >= 0 && togenomeid >= 0) 
+	{
+	  TuxEvolution::from_genome_id = fromgenomeid;
+	  TuxEvolution::to_genome_id = togenomeid;
+	}
+	else
+	{
+	  throw std::runtime_error("Genome ID must be >= 0");
+	}
+      }
+      i += 2;
+    }
+    else if (arg == "--dbfile")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before setting dbfile");
+      }
+      
+      if (i + 1 >= argc || argv[i + 1][0] == '-') 
+      {
+	throw std::runtime_error("Need to specify a database file after using --dbfile");
+      }
+      else
+      {
+	TuxEvolution::dbfile = argv[++i];
+      }
+    }
+    else if (arg == "--curgen")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before setting current generation");
+      }
+      
+      int curgen = -1;
+      
+      if ((i + 1 < argc && sscanf(argv[i + 1], "%d", &curgen) == 1))
+      {
+	if (curgen >= 0) 
+	{
+	  TuxEvolution::current_gen = curgen;
+	}
+	else
+	{
+	  throw std::runtime_error("Current generation must be >= 0");
 	}
       }
     }
