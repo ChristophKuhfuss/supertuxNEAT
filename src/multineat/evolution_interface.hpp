@@ -45,6 +45,14 @@ private:
   float fitness_idle;
   float max_x;
   
+  int ticks_total;
+  int ticks_down;
+  int ticks_up;
+  int ticks_left;
+  int ticks_right;
+  int ticks_jump;
+  int ticks_action;
+  
 public:
   EvolutionInterface(GameSession* session, std::shared_ptr<SensorManager> sensor_manager);
   ~EvolutionInterface();

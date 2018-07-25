@@ -27,12 +27,21 @@ struct NeatInputs  {
 };
 
 struct NeatOutputs {
-    double direction_up;
-    double direction_down;
-    double direction_left;
-    double direction_right;
-    double jump;
-    double action;
+  double direction_up;
+  double direction_down;
+  double direction_left;
+  double direction_right;
+  double jump;
+  double action;
+};
+
+struct OutputQuotas {
+  double qDown;
+  double qUp;
+  double qLeft;
+  double qRight;
+  double qJump;
+  double qAction;
 };
 
 class TuxEvolution {
@@ -86,7 +95,7 @@ public:
   TuxEvolution();
   ~TuxEvolution();
     
-  bool on_tux_death(float progress);
+  bool on_tux_death(float progress, OutputQuotas q);
   void accept_inputs(NeatInputs inputs);
   NeatOutputs get_outputs();
   
@@ -109,7 +118,7 @@ private:
   void save_pop();
   void set_viewing_genome();
   
-  void update_db();
+  void update_db(int genome_id, float fitness, OutputQuotas q);
   static int busy_handler(void* data, int retry);
 
 public:

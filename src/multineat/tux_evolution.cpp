@@ -118,7 +118,7 @@ bool TuxEvolution::tux_epoch()
 
 // Calculates fitness of current genome and marks the evaluated flag
 // Returns the result of advance_genome(), which is false if the simulation finished
-bool TuxEvolution::on_tux_death(float progress)
+bool TuxEvolution::on_tux_death(float progress, OutputQuotas q)
 {
   double fitness = tux_evaluate(progress);
 //   std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << fitness << "." << std::endl;
@@ -126,6 +126,7 @@ bool TuxEvolution::on_tux_death(float progress)
   if (!viewing_mode) {
     //Only set fitness - adjfitness is set by species on pop.Epoch()
     cur_genome->SetFitness(fitness);
+    update_db(cur_genome->GetID(), fitness, q);
     return advance_genome();
   } else {
     cur_network.Flush();
@@ -153,8 +154,7 @@ bool TuxEvolution::advance_genome()
   } else if (from_genome_id == -1 && to_genome_id == -1) {
     return tux_epoch();
   } else {
-    // We're done! Update db and let nature have its course
-    update_db();
+    // We're done!
     return false;
   }
 }
@@ -276,7 +276,7 @@ void TuxEvolution::on_level_won()
 }
 
 // For each genome, update the row in the current db table with the right fitness value
-void TuxEvolution::update_db()
+void TuxEvolution::update_db(int genome_id, float fitness, OutputQuotas q)
 {
   sqlite3* db;  
   
@@ -285,13 +285,18 @@ void TuxEvolution::update_db()
   
   char* err;
   
-  for (std::vector<Genome*>::iterator it = remaining_genomes.begin(); it != remaining_genomes.end(); ++it) {
-    std::stringstream ss;
+  std::stringstream ss;
     
-    ss << "UPDATE gen" << current_gen << " SET fitness = " << (*it)->GetFitness() << " WHERE id = " << (*it)->GetID() << ";";
+  ss << "UPDATE gen" << current_gen << " SET fitness = " << fitness << 
+	", qLeft = " << q.qLeft <<
+	", qRight = " << q.qRight <<
+	", qUp = " << q.qUp <<
+	", qDown = " << q.qDown <<
+	", qJump = " << q.qJump <<
+	", qAction = " << q.qAction << 
+	" WHERE id = " << genome_id << ";";
         
-    sqlite3_exec(db, ss.str().c_str(), 0, 0, &err);
-  }
+  sqlite3_exec(db, ss.str().c_str(), 0, 0, &err);
   
   sqlite3_close(db);
 }

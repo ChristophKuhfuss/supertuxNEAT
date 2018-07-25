@@ -27,6 +27,8 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/format.hpp>
 
+#include <string>
+
 class Config
 {
 public:
@@ -64,6 +66,8 @@ public:
       static so it's accessible from anywhere*/
   static bool neat_activated;
   static bool neat_headless_mode;
+  
+  static std::string neat_experimentparamfile;
 
   /** initial random seed.  0 ==> set from time() */
   int random_seed;

@@ -29,6 +29,7 @@
 
 bool Config::neat_activated = false;
 bool Config::neat_headless_mode = false;
+std::string Config::neat_experimentparamfile = "";
 
 Config::Config() :
   profile(1),
