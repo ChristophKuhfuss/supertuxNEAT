@@ -26,6 +26,8 @@ public:
   virtual void update(float elapsed_time) override;
   virtual void draw(DrawingContext& context) override;
   
+  Vector get_offset2() { return offset2; };
+  
   // Rotates a point by given rad
   static Vector rotate_point(const Vector& point, double rad);
   

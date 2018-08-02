@@ -21,6 +21,9 @@ ticks_right(0),
 ticks_jump(0),
 ticks_action(0)
 {
+  // At this point, there should be a set of sensors for the coordinates
+  /*if (TuxEvolution::hyperneat) 
+    neat.generate_substrate(sensor_manager);*/
 }
 
 EvolutionInterface::~EvolutionInterface()
@@ -34,7 +37,7 @@ void EvolutionInterface::init()
   cur_sector = cur_session->get_current_sector();
   tux = cur_sector->player;
   tux->set_controller(controller.get());
-  sensor_manager->initSensors();
+  sensor_manager->initSensors(true);
 }
 
 

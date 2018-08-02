@@ -8,6 +8,8 @@
 
 #include <sqlite3.h>
 
+bool TuxEvolution::hyperneat = false;
+
 int TuxEvolution::from_genome_id = -1;
 int TuxEvolution::to_genome_id = -1;
 
@@ -42,8 +44,10 @@ TuxEvolution::TuxEvolution() : params(init_params()),
   cur_outputs(),
   cur_inputs()
 {
-  //print_stacktrace();
   pop.m_RNG.Seed(seed);
+  
+  if (SensorManager::instance)
+    generate_substrate(SensorManager::instance);
   
   if (!viewing_mode) {
     gens = 0;
@@ -188,6 +192,175 @@ void TuxEvolution::refresh_genome_list()
   }
 }
 
+void TuxEvolution::generate_substrate(SensorManager* sm)
+{  
+  std::vector<std::vector<double>> input_coords;
+  std::vector<std::vector<double>> hidden_coords;	// TODO: Add support for hidden neurons (third dimension, arrange in a circle)
+  std::vector<std::vector<double>> output_coords;
+  
+  std::vector<std::shared_ptr<RangeFinderSensor>>* rfsensors = sm->get_cur_rangefinder_sensors();
+  std::vector<std::shared_ptr<DepthFinderSensor>>* dfsensors = sm->get_cur_depthfinder_sensors();
+  std::vector<std::shared_ptr<PieSliceSensor>>*    pssensors = sm->get_cur_pieslice_sensors();
+  
+  // First, calculate maximum x and y coordinates so we can normalize substrate coordinates to (-1, 1)
+  int maxX = 0;
+  int maxY = 0;
+  
+  for (std::vector<std::shared_ptr<RangeFinderSensor>>::iterator it = rfsensors->begin(); it != rfsensors->end(); ++it)
+  {
+    Vector v = (*it)->get_offset();
+    
+    // Get middle point of the RangeFinderSensor
+    int x = v.x / 2;
+    int y = v.y;
+    
+    if (x > maxX)
+      maxX = x;
+    
+    if (y > maxY) 
+      maxY = y;
+    
+  }
+  
+  for (std::vector<std::shared_ptr<DepthFinderSensor>>::iterator it = dfsensors->begin(); it != dfsensors->end(); ++it)
+  {
+    Vector v = (*it)->get_offset();
+    
+    // Get middle point of the DepthFinderSensor
+    int x = v.x;
+    int y = v.y / 2;
+    
+    if (x > maxX) 
+      maxX = x;
+    
+    if (y > maxY)
+      maxY = y;
+    
+  }
+  
+  for (std::vector<std::shared_ptr<PieSliceSensor>>::iterator it = pssensors->begin(); it != pssensors->end(); ++it)
+  {
+    Vector v1 = (*it)->get_offset();
+    Vector v2 = (*it)->get_offset2();
+    
+    // Get middle point of the PieSliceSensor
+    // Divide by three because both vectors form a triangle with (0, 0) as the third point
+    int x = (v1.x + v2.x) / 3;
+    int y = (v1.y + v2.y) / 3;
+    
+    if (x > maxX)
+      maxX = x;
+    
+    if (y > maxY)
+      maxY = y;
+    
+  }
+    
+  for (std::vector<std::shared_ptr<RangeFinderSensor>>::iterator it = rfsensors->begin(); it != rfsensors->end(); ++it)
+  {
+    std::vector<double> coords;
+    
+    Vector v = (*it)->get_offset();
+    
+    // Normalize between (0, 1) and then between (-1, 1)
+    double x = (v.x / (double) maxX) * 2 - 1;
+    double y = (v.y / (double) maxY) * 2 - 1;
+    coords.push_back(x);
+    coords.push_back(y);
+    
+    input_coords.push_back(coords);
+  }
+  
+  for (std::vector<std::shared_ptr<DepthFinderSensor>>::iterator it = dfsensors->begin(); it != dfsensors->end(); ++it)
+  {
+    std::vector<double> coords;
+    
+    Vector v = (*it)->get_offset();
+    
+    coords.push_back((v.x / (double) maxX) * 2 - 1);
+    coords.push_back((v.y / (double) maxY) * 2 - 1);
+    
+    input_coords.push_back(coords);
+  }
+  
+  for (std::vector<std::shared_ptr<PieSliceSensor>>::iterator it = pssensors->begin(); it != pssensors->end(); ++it)
+  {
+    std::vector<double> coords;
+    
+    Vector v1 = (*it)->get_offset();
+    Vector v2 = (*it)->get_offset2();
+    
+    // Same procedure as above, third point is (0, 0)
+    int x = (v1.x + v2.x) / 3;
+    int y = (v1.y + v2.y) / 3;
+    
+    coords.push_back((x / (double) maxX) * 2 - 1);
+    coords.push_back((y / (double) maxY) * 2 - 1);
+    
+    input_coords.push_back(coords);
+  }
+  
+  /*for (std::vector<std::vector<double>>::iterator it = input_coords.begin(); it != input_coords.end(); ++it)
+  {
+    std::cout << "Coordinates: (" << (*it)[0] << ", " << (*it)[1] << ")" << std::endl;
+  }*/
+  
+  // TODO: Arrange hidden neurons in a circle around Tux, seems like a good idea
+  
+  std::vector<double> output;
+  
+  // Arrange output substrate coordinates around Tux
+  // UP should be above Tux, DOWN below, etc. with Tux "being" at (0, 0)
+  
+  // UP
+  output.push_back(0);
+  output.push_back(1);
+  
+  output_coords.push_back(output);
+  output.clear();
+  
+  // DOWN
+  output.push_back(0);
+  output.push_back(-1);
+  
+  output_coords.push_back(output);
+  output.clear();
+  
+  // LEFT
+  output.push_back(-1);
+  output.push_back(0);
+  
+  output_coords.push_back(output);
+  output.clear();
+  
+  // RIGHT
+  output.push_back(1);
+  output.push_back(0);
+  
+  output_coords.push_back(output);
+  output.clear();
+  
+  // JUMP
+  output.push_back(0);
+  output.push_back(0.8);
+  
+  output_coords.push_back(output);
+  output.clear();
+  
+  // ACTION
+  output.push_back(0);
+  output.push_back(0.1);
+  
+  output_coords.push_back(output);
+  
+  substrate = Substrate(input_coords, hidden_coords, output_coords);
+  
+  start_genome = Genome(0, substrate.GetMinCPPNInputs(), 0, 
+	       substrate.GetMinCPPNOutputs(), false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 1, params);
+  pop = strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 2.0, (using_seed ? seed : (int) time(0)));
+}
+
+
 // For debugging purposes
 void TuxEvolution::print_all_genomes()
 {
@@ -199,7 +372,6 @@ void TuxEvolution::print_all_genomes()
   }
 }
 
-
 Parameters TuxEvolution::init_params()
 {
   Parameters res;
@@ -210,7 +382,6 @@ Parameters TuxEvolution::init_params()
   
   return res;
 }
-
 
 double TuxEvolution::get_top_fitness()
 {
@@ -226,47 +397,16 @@ int TuxEvolution::get_generation_number()
 void TuxEvolution::get_genome_from_iterator()
 {
   cur_genome = *it;
-  cur_genome->BuildPhenotype(cur_network);
-  cur_genome->CalculateDepth();
-}
-
-int TuxEvolution::get_current_genome_id()
-{
-  return cur_genome->GetID();
-}
-
-void TuxEvolution::autosave()
-{
-  if ((gens + 1) % autosave_interval == 0) {
-    save_pop();
-  }
-}
-
-void TuxEvolution::save_pop()
-{
-    std::ostringstream ss;
-    ss << "./neat_gen" << (gens + 1);
-    pop.Save(ss.str().c_str());
-}
-
-
-void TuxEvolution::set_viewing_genome()
-{
-  refresh_genome_list();
   
-  it = remaining_genomes.begin();
+  hyperneat ? cur_genome->BuildPhenotype(cur_network) : cur_genome->BuildHyperNEATPhenotype(cur_network, substrate);
   
-  while (it != remaining_genomes.end() && (*it)->GetID() != view_genome_id) ++it;
-  
-  if (it == remaining_genomes.end()) {
-    std::ostringstream ss;
-    ss << "Couldn't find genome with ID " << view_genome_id;
-    
-    throw std::runtime_error(ss.str());
+  if(!hyperneat) {
+    cur_genome->BuildPhenotype(cur_network);
   } else {
-    get_genome_from_iterator();
-    std::cout << "Found genome. Starting playback..." << std::endl;
+    cur_genome->BuildHyperNEATPhenotype(cur_network, substrate);
   }
+  
+  cur_genome->CalculateDepth();
 }
 
 // Just to make sure we don't lose winners
@@ -308,5 +448,43 @@ int TuxEvolution::busy_handler(void* data, int retry)
     return 1;
   } else {
     return 0;
+  }
+}
+
+int TuxEvolution::get_current_genome_id()
+{
+  return cur_genome->GetID();
+}
+
+void TuxEvolution::autosave()
+{
+  if ((gens + 1) % autosave_interval == 0) {
+    save_pop();
+  }
+}
+
+void TuxEvolution::save_pop()
+{
+    std::ostringstream ss;
+    ss << "./neat_gen" << (gens + 1);
+    pop.Save(ss.str().c_str());
+}
+
+void TuxEvolution::set_viewing_genome()
+{
+  refresh_genome_list();
+  
+  it = remaining_genomes.begin();
+  
+  while (it != remaining_genomes.end() && (*it)->GetID() != view_genome_id) ++it;
+  
+  if (it == remaining_genomes.end()) {
+    std::ostringstream ss;
+    ss << "Couldn't find genome with ID " << view_genome_id;
+    
+    throw std::runtime_error(ss.str());
+  } else {
+    get_genome_from_iterator();
+    std::cout << "Found genome. Starting playback..." << std::endl;
   }
 }

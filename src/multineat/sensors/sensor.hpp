@@ -10,6 +10,7 @@
 #include "object/player.hpp"
 #include "supertux/collision_hit.hpp"
 #include "supertux/game_object.hpp"
+#include "math/vector.hpp"
 
 #include <vector>
 
@@ -27,6 +28,7 @@ protected:
   double value;
   
 public:
+  Vector get_offset() { return offset; };
   virtual void update(float elapsed_time);
   virtual void draw(DrawingContext& context);
   double getValue() { return value; };

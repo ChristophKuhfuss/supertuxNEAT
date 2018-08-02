@@ -589,6 +589,14 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	}
       }
     }
+    else if (arg == "--hyperneat")
+    {
+      if (m_action != START_EVOLUTION) {
+	throw std::runtime_error("Need to specify NEAT usage before setting hyperneat usage");
+      }
+      
+      TuxEvolution::hyperneat = true;
+    }
     else if (arg[0] != '-')
     {
       start_level = arg;

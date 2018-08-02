@@ -219,10 +219,6 @@ GameSession::restart_level(bool after_death)
 //     }
   }
   
-  SensorManager sm(this);
-  
-  sm.initSensors();
-  
   return (0);
 }
 
