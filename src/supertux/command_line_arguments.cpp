@@ -139,6 +139,7 @@ CommandLineArguments::print_version() const
 void
 CommandLineArguments::parse_args(int argc, char** argv)
 {
+  bool visualmode = false;
   
   for(int i = 1; i < argc; ++i)
   {
@@ -400,7 +401,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
       }
       
       m_action = START_EVOLUTION;
-      Config::neat_headless_mode = false;
+      visualmode = true;
     }
     else if (arg == "--sensorgridsize")
     {
@@ -608,7 +609,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
   
   if (m_action != START_EVOLUTION)
       Config::neat_headless_mode = false;
-  else
+  else if (!visualmode)
       Config::neat_headless_mode = true;
 }
 
