@@ -46,7 +46,7 @@ TuxEvolution::TuxEvolution() : params(init_params()),
 {
   pop.m_RNG.Seed(seed);
   
-  if (SensorManager::instance)
+  if (SensorManager::instance && hyperneat)
     generate_substrate(SensorManager::instance);
   
   if (!viewing_mode) {
@@ -398,13 +398,7 @@ void TuxEvolution::get_genome_from_iterator()
 {
   cur_genome = *it;
   
-  hyperneat ? cur_genome->BuildPhenotype(cur_network) : cur_genome->BuildHyperNEATPhenotype(cur_network, substrate);
-  
-  if(!hyperneat) {
-    cur_genome->BuildPhenotype(cur_network);
-  } else {
-    cur_genome->BuildHyperNEATPhenotype(cur_network, substrate);
-  }
+  hyperneat ? cur_genome->BuildHyperNEATPhenotype(cur_network, substrate) : cur_genome->BuildPhenotype(cur_network);
   
   cur_genome->CalculateDepth();
 }

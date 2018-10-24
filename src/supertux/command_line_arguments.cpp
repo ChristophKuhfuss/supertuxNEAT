@@ -139,7 +139,6 @@ CommandLineArguments::print_version() const
 void
 CommandLineArguments::parse_args(int argc, char** argv)
 {
-  Config::neat_headless_mode = true;
   
   for(int i = 1; i < argc; ++i)
   {
@@ -606,6 +605,11 @@ CommandLineArguments::parse_args(int argc, char** argv)
       throw std::runtime_error((boost::format("Unknown option '%1%''. Use --help to see a list of options") % arg).str());
     }
   }
+  
+  if (m_action != START_EVOLUTION)
+      Config::neat_headless_mode = false;
+  else
+      Config::neat_headless_mode = true;
 }
 
 void
