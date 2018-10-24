@@ -9,6 +9,10 @@ RangeFinderSensor::RangeFinderSensor(Sector* sec, int offsetY) :
 {
 }
 
+RangeFinderSensor::RangeFinderSensor(int offsetY) : Sensor(0, offsetY)
+{
+}
+
 void RangeFinderSensor::update(float elapsed_time)
 {
   value = 0;

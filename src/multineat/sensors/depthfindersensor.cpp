@@ -4,7 +4,11 @@
 
 int DepthFinderSensor::length = 512;
 
-DepthFinderSensor::DepthFinderSensor(Sector* sec, int offsetX): Sensor(sec, offsetX, 0)
+DepthFinderSensor::DepthFinderSensor(Sector* sec, int offsetX) : Sensor(sec, offsetX, 0)
+{
+}
+
+DepthFinderSensor::DepthFinderSensor(int offsetX) : Sensor(offsetX, 0)
 {
 }
 

@@ -19,6 +19,9 @@ class Sensor : public GameObject {
   
 public:
   Sensor(Sector* sec, int offsetX, int offsetY);
+  // Constructor without sector pointer for hyperneat "dummy" sensors for substrate generation
+  // We only care about the offsets for the substrate dimensions
+  Sensor(int offsetX, int offsetY);
   
 protected:
   Sector* sec;

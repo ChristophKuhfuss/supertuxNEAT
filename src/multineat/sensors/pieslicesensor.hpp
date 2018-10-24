@@ -22,6 +22,7 @@ protected:
   
 public:
   PieSliceSensor(Sector* sec, double angle1, double angle2);
+  PieSliceSensor(double angle1, double angle2);
   
   virtual void update(float elapsed_time) override;
   virtual void draw(DrawingContext& context) override;

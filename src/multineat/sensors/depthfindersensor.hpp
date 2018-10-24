@@ -11,6 +11,7 @@ protected:
   static int length;
 public:
   DepthFinderSensor(Sector* sec, int offsetX);
+  DepthFinderSensor(int offsetX);
   
   virtual void update(float elapsed_time) override;
   virtual void draw(DrawingContext& context) override;

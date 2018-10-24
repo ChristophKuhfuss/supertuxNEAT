@@ -68,7 +68,7 @@ void SensorManager::create_rangefinder_sensors(bool add_to_sector)
   int spacing = 0;
   
   for (int i = 0; i < AMOUNT_RANGE_SENSORS; i++) {
-    std::shared_ptr<RangeFinderSensor> sensor = std::make_shared<RangeFinderSensor>(sec, spacing);
+    std::shared_ptr<RangeFinderSensor> sensor = (add_to_sector ? std::make_shared<RangeFinderSensor>(sec, spacing) : std::make_shared<RangeFinderSensor>(spacing));
     if (add_to_sector) sec->add_object(sensor);
     cur_sensors->push_back(sensor);
     cur_rangefinder_sensors->push_back(sensor);
@@ -81,7 +81,7 @@ void SensorManager::create_depthfinder_sensors(bool add_to_sector)
   int spacing = 0;
   
   for (int i = 0; i < AMOUNT_DEPTH_SENSORS; i++) {
-    std::shared_ptr<DepthFinderSensor> sensor = std::make_shared<DepthFinderSensor>(sec, spacing);
+    std::shared_ptr<DepthFinderSensor> sensor = (add_to_sector ? std::make_shared<DepthFinderSensor>(sec, spacing) : std::make_shared<DepthFinderSensor>(spacing));
     if (add_to_sector) sec->add_object(sensor);
     cur_sensors->push_back(sensor);
     cur_depthfinder_sensors->push_back(sensor);
@@ -95,7 +95,7 @@ void SensorManager::create_pieslice_sensors(bool add_to_sector)
   double angle_step = M_PI / AMOUNT_PIESLICE_SENSORS;
   
   for (int i = 0; i < AMOUNT_PIESLICE_SENSORS; i++) {
-    std::shared_ptr<PieSliceSensor> sensor = std::make_shared<PieSliceSensor>(sec, cur_angle, cur_angle + angle_step);
+    std::shared_ptr<PieSliceSensor> sensor = (add_to_sector? std::make_shared<PieSliceSensor>(sec, cur_angle, cur_angle + angle_step) : std::make_shared<PieSliceSensor>(cur_angle, cur_angle + angle_step));
     if (add_to_sector) sec->add_object(sensor);
     cur_sensors->push_back(sensor);
     cur_pieslice_sensors->push_back(sensor);

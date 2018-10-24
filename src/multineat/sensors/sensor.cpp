@@ -10,6 +10,10 @@ value(0)
 {
 }
 
+Sensor::Sensor(int offsetX, int offsetY) : offset(Vector(offsetX, offsetY)), value(0)
+{
+}
+
 void Sensor::update(float elapsed_time) {
   Rectf lookahead = tux->get_bbox();
   lookahead.p2.x += offset.x - 10;

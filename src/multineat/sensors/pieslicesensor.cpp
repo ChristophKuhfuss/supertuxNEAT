@@ -16,6 +16,12 @@ angle2(angle2 < 0 ? angle2 + 2 * M_PI : angle2)
   offset2 = rotate_point(Vector(radius, 0), angle2);
 }
 
+PieSliceSensor::PieSliceSensor(double angle1, double angle2) : Sensor(0, 0), 
+angle1(angle1 < 0 ? angle1 + 2 * M_PI : angle1),
+angle2(angle2 < 0 ? angle2 + 2 * M_PI : angle2)
+{
+}
+
 void PieSliceSensor::update(float elapsed_time) 
 {
   value = 0;

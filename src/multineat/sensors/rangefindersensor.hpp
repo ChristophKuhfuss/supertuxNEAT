@@ -11,6 +11,7 @@ protected:
   static int length;
 public:
   RangeFinderSensor(Sector* sec, int offsetY);
+  RangeFinderSensor(int offsetY);
   
   virtual void update(float elapsed_time) override;
   virtual void draw(DrawingContext& context) override;
