@@ -36,7 +36,8 @@ void SensorManager::initSensors(bool add_to_sector)
     sec = session->get_current_sector();
     tux = sec->player;
   }
-  cur_sensors->clear();
+  
+  clearSensors();
   
   create_rangefinder_sensors(add_to_sector);
   create_depthfinder_sensors(add_to_sector);

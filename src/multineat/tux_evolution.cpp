@@ -36,7 +36,7 @@ int TuxEvolution::max_db_retry = 100;
 int TuxEvolution::db_sleeptime = 50;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
-  start_genome(0, SensorManager::get_total_sensor_count() + 1, 10, 
+  start_genome(0, SensorManager::get_total_sensor_count() + 1, 5, 
 	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 1, params),
   pop(strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 2.0, (using_seed ? seed : (int) time(0)))),
   top_fitness(0),
@@ -46,8 +46,9 @@ TuxEvolution::TuxEvolution() : params(init_params()),
 {
   pop.m_RNG.Seed(seed);
   
-  if (SensorManager::instance && hyperneat)
+  if (SensorManager::instance && hyperneat) {
     generate_substrate(SensorManager::instance);
+  }
   
   if (!viewing_mode) {
     gens = 0;
@@ -75,6 +76,7 @@ void TuxEvolution::propagate_inputs()
 {
   cur_network.Flush();
   vector<double> inputs = vector<double>(cur_inputs.sensors);
+  //Bias
   inputs.push_back(1);
   cur_network.Input(inputs);
   
@@ -193,7 +195,9 @@ void TuxEvolution::refresh_genome_list()
 }
 
 void TuxEvolution::generate_substrate(SensorManager* sm)
-{  
+{
+  this->sm = sm;
+  
   std::vector<std::vector<double>> input_coords;
   std::vector<std::vector<double>> hidden_coords;	// TODO: Add support for hidden neurons (third dimension, arrange in a circle)
   std::vector<std::vector<double>> output_coords;
@@ -211,8 +215,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v = (*it)->get_offset();
     
     // Get middle point of the RangeFinderSensor
-    int x = v.x / 2;
-    int y = v.y;
+    int x = abs(v.x / 2.0);
+    int y = abs(v.y);
     
     if (x > maxX)
       maxX = x;
@@ -227,8 +231,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v = (*it)->get_offset();
     
     // Get middle point of the DepthFinderSensor
-    int x = v.x;
-    int y = v.y / 2;
+    int x = abs(v.x);
+    int y = abs(v.y / 2.0);
     
     if (x > maxX) 
       maxX = x;
@@ -245,8 +249,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     
     // Get middle point of the PieSliceSensor
     // Divide by three because both vectors form a triangle with (0, 0) as the third point
-    int x = (v1.x + v2.x) / 3;
-    int y = (v1.y + v2.y) / 3;
+    int x = abs((v1.x + v2.x) / 3.0);
+    int y = abs((v1.y + v2.y) / 3.0);
     
     if (x > maxX)
       maxX = x;
@@ -263,10 +267,11 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v = (*it)->get_offset();
     
     // Normalize between (0, 1) and then between (-1, 1)
-    double x = (v.x / (double) maxX) * 2 - 1;
-    double y = (v.y / (double) maxY) * 2 - 1;
-    coords.push_back(x);
-    coords.push_back(y);
+    coords.push_back(v.x / (double) maxX);
+    coords.push_back(v.y / (double) maxY);
+    
+    coords.push_back(v.x);
+    coords.push_back(v.y);
     
     input_coords.push_back(coords);
   }
@@ -277,8 +282,11 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     
     Vector v = (*it)->get_offset();
     
-    coords.push_back((v.x / (double) maxX) * 2 - 1);
-    coords.push_back((v.y / (double) maxY) * 2 - 1);
+    coords.push_back((v.x / (double) maxX));
+    coords.push_back((v.y / (double) maxY));
+    
+    coords.push_back(v.x);
+    coords.push_back(v.y);
     
     input_coords.push_back(coords);
   }
@@ -290,20 +298,19 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v1 = (*it)->get_offset();
     Vector v2 = (*it)->get_offset2();
     
-    // Same procedure as above, third point is (0, 0)
-    int x = (v1.x + v2.x) / 3;
-    int y = (v1.y + v2.y) / 3;
-    
-    coords.push_back((x / (double) maxX) * 2 - 1);
-    coords.push_back((y / (double) maxY) * 2 - 1);
+    // Same procedure as above, third point is (0, 0)    
+    coords.push_back(((v1.x + v2.x) / 3.0) / (double) maxX);
+    coords.push_back(((v1.y + v2.y) / 3.0) / (double) maxY);
     
     input_coords.push_back(coords);
   }
   
-  /*for (std::vector<std::vector<double>>::iterator it = input_coords.begin(); it != input_coords.end(); ++it)
-  {
-    std::cout << "Coordinates: (" << (*it)[0] << ", " << (*it)[1] << ")" << std::endl;
-  }*/
+  std::vector<double> bias;
+  bias.push_back(0);
+  bias.push_back(0);
+  
+  input_coords.push_back(bias);
+  
   
   // TODO: Arrange hidden neurons in a circle around Tux, seems like a good idea
   
@@ -353,11 +360,68 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   
   output_coords.push_back(output);
   
+  // Parameters taken from MultiNEAT's HyperNEAT example
+  
   substrate = Substrate(input_coords, hidden_coords, output_coords);
   
+  substrate.m_allow_hidden_hidden_links = false;
+  substrate.m_allow_hidden_output_links = true;
+  substrate.m_allow_input_hidden_links = true;
+  substrate.m_allow_input_output_links = true;
+  substrate.m_allow_looped_hidden_links = false;
+  substrate.m_allow_looped_output_links = false;
+  substrate.m_allow_output_hidden_links = false;
+  substrate.m_allow_output_output_links = false;
+  substrate.m_query_weights_only = true;
+  substrate.m_max_weight_and_bias = 8;
+  
+  substrate.m_hidden_nodes_activation = ActivationFunction::SIGNED_SIGMOID;
+  substrate.m_output_nodes_activation = ActivationFunction::UNSIGNED_SIGMOID;
+  
+//   params.PopulationSize = 150;
+// 
+//   params.DynamicCompatibility = true;
+//   params.CompatTreshold = 2.0;
+//   params.YoungAgeTreshold = 15;
+//   params.SpeciesMaxStagnation = 100;
+//   params.OldAgeTreshold = 35;
+//   params.MinSpecies = 5;
+//   params.MaxSpecies = 10;
+//   params.RouletteWheelSelection = false;
+// 
+//   params.MutateRemLinkProb = 0.02;
+//   params.RecurrentProb = 0;
+//   params.OverallMutationRate = 0.15;
+//   params.MutateAddLinkProb = 0.08;
+//   params.MutateAddNeuronProb = 0.01;
+//   params.MutateWeightsProb = 0.90;
+//   params.MaxWeight = 8.0;
+//   params.WeightMutationMaxPower = 0.2;
+//   params.WeightReplacementMaxPower = 1.0;
+// 
+//   params.MutateActivationAProb = 0.0;
+//   params.ActivationAMutationMaxPower = 0.5;
+//   params.MinActivationA = 0.05;
+//   params.MaxActivationA = 6.0;
+// 
+//   params.MutateNeuronActivationTypeProb = 0.03;
+// 
+//   params.ActivationFunction_SignedSigmoid_Prob = 0.0;
+//   params.ActivationFunction_UnsignedSigmoid_Prob = 0.0;
+//   params.ActivationFunction_Tanh_Prob = 1.0;
+//   params.ActivationFunction_TanhCubic_Prob = 0.0;
+//   params.ActivationFunction_SignedStep_Prob = 1.0;
+//   params.ActivationFunction_UnsignedStep_Prob = 0.0;
+//   params.ActivationFunction_SignedGauss_Prob = 1.0;
+//   params.ActivationFunction_UnsignedGauss_Prob = 0.0;
+//   params.ActivationFunction_Abs_Prob = 0.0;
+//   params.ActivationFunction_SignedSine_Prob = 1.0;
+//   params.ActivationFunction_UnsignedSine_Prob = 0.0;
+//   params.ActivationFunction_Linear_Prob = 1.0;
+  
   start_genome = Genome(0, substrate.GetMinCPPNInputs(), 0, 
-	       substrate.GetMinCPPNOutputs(), false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 1, params);
-  pop = strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 2.0, (using_seed ? seed : (int) time(0)));
+	       substrate.GetMinCPPNOutputs(), false, TANH, TANH, 0, params);
+  pop = strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 1.0, (using_seed ? seed : (int) time(0)));
 }
 
 
@@ -398,9 +462,20 @@ void TuxEvolution::get_genome_from_iterator()
 {
   cur_genome = *it;
   
+  // If we don't clear the network first, we'll run into some bad problems with HyperNEAT
+  // Each produced network would have input + output more neurons than the last one
+  cur_network.Clear();
+  
   hyperneat ? cur_genome->BuildHyperNEATPhenotype(cur_network, substrate) : cur_genome->BuildPhenotype(cur_network);
   
   cur_genome->CalculateDepth();
+  
+  std::cout << "Net inputs: " << cur_network.m_num_inputs << ", net outputs: " << cur_network.m_num_outputs << ", net hidden: " << cur_network.m_neurons.size() - cur_network.m_num_inputs - cur_network.m_num_outputs << std::endl;
+  std::cout << "Net depth: " << cur_genome->GetDepth() << std::endl;
+  std::cout << "Connection count: " << cur_network.m_connections.size() << std::endl;
+  for (std::vector<Connection>::iterator it = cur_network.m_connections.begin(); it != cur_network.m_connections.end(); ++it) {
+    std::cout << (*it).m_weight << std::endl;
+  }
 }
 
 // Just to make sure we don't lose winners

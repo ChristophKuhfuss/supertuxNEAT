@@ -98,6 +98,8 @@ private:
   
   static int max_db_retry;
   static int db_sleeptime;
+  
+  SensorManager* sm;
 
 public:
   TuxEvolution();
