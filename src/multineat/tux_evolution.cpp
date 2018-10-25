@@ -470,12 +470,12 @@ void TuxEvolution::get_genome_from_iterator()
   
   cur_genome->CalculateDepth();
   
-  std::cout << "Net inputs: " << cur_network.m_num_inputs << ", net outputs: " << cur_network.m_num_outputs << ", net hidden: " << cur_network.m_neurons.size() - cur_network.m_num_inputs - cur_network.m_num_outputs << std::endl;
-  std::cout << "Net depth: " << cur_genome->GetDepth() << std::endl;
-  std::cout << "Connection count: " << cur_network.m_connections.size() << std::endl;
-  for (std::vector<Connection>::iterator it = cur_network.m_connections.begin(); it != cur_network.m_connections.end(); ++it) {
-    std::cout << (*it).m_weight << std::endl;
-  }
+//   std::cout << "Net inputs: " << cur_network.m_num_inputs << ", net outputs: " << cur_network.m_num_outputs << ", net hidden: " << cur_network.m_neurons.size() - cur_network.m_num_inputs - cur_network.m_num_outputs << std::endl;
+//   std::cout << "Net depth: " << cur_genome->GetDepth() << std::endl;
+//   std::cout << "Connection count: " << cur_network.m_connections.size() << std::endl;
+//   for (std::vector<Connection>::iterator it = cur_network.m_connections.begin(); it != cur_network.m_connections.end(); ++it) {
+//     std::cout << (*it).m_weight << std::endl;
+//   }
 }
 
 // Just to make sure we don't lose winners
