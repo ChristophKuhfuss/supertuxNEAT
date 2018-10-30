@@ -63,6 +63,9 @@ public:
   static int sensor_grid_padding;
   static bool custom_sensor_grid;
   
+  static int num_hidden_start_neurons;
+  static int num_hidden_start_neurons_cppn;
+  
   static bool using_seed;
   static int seed;
   

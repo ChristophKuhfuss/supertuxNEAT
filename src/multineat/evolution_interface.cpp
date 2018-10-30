@@ -21,9 +21,6 @@ ticks_right(0),
 ticks_jump(0),
 ticks_action(0)
 {
-  // At this point, there should be a set of sensors for the coordinates
-  /*if (TuxEvolution::hyperneat) 
-    neat.generate_substrate(sensor_manager);*/
 }
 
 EvolutionInterface::~EvolutionInterface()
@@ -49,7 +46,7 @@ void EvolutionInterface::update(float elapsed_time)
   ticks_total++;
   update_idle(elapsed_time);
   if (idle < TIMEOUT && fitness_idle < FITNESS_TIMEOUT) {
-    neat.accept_inputs(generate_inputs());
+    send_inputs(generate_inputs());
     outputs = neat.get_outputs();
     send_outputs();
   } else {
@@ -87,7 +84,6 @@ void EvolutionInterface::send_inputs(NeatInputs inputs)
 void EvolutionInterface::send_outputs() 
 {
   controller->update();
-  
   if (outputs.direction_up >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
       std::cerr << "Button:U" << std::endl;

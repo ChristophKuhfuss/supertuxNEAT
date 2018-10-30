@@ -12,7 +12,7 @@
 class GameSession;
 
 class SensorManager {
-  friend class ExperimentParameterParser;
+  friend class ExperimentParameterParser; 	// Dirty Workaround, fix me (generate offsets in SensorManager and stop rotating in PieSliceSensor altogether)
   
 private:
   static int TILE_WIDTH;

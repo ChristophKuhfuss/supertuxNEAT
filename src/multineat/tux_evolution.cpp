@@ -19,6 +19,9 @@ int TuxEvolution::sensor_grid_size = 15;
 int TuxEvolution::sensor_grid_padding = 18;
 bool TuxEvolution::custom_sensor_grid = false;
 
+int TuxEvolution::num_hidden_start_neurons = 0;
+int TuxEvolution::num_hidden_start_neurons_cppn = 0;
+
 bool TuxEvolution::using_seed = false;
 int TuxEvolution::seed;
 
@@ -36,7 +39,7 @@ int TuxEvolution::max_db_retry = 100;
 int TuxEvolution::db_sleeptime = 50;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
-  start_genome(0, SensorManager::get_total_sensor_count() + 1, 5, 
+  start_genome(0, SensorManager::get_total_sensor_count() + 1, num_hidden_start_neurons, 
 	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 1, params),
   pop(strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 2.0, (using_seed ? seed : (int) time(0)))),
   top_fitness(0),
@@ -210,6 +213,45 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   int maxX = 0;
   int maxY = 0;
   
+  double inputZ = -1;
+  double outputZ = 1;
+  double hiddenZ = 0;
+  
+  if (num_hidden_start_neurons > 0) {
+    std::vector<double> coords;
+    if (num_hidden_start_neurons == 1) {
+      // If there is only one hidden start neuron, place it in the center and be done with it
+      coords.push_back(0);
+      coords.push_back(0);
+      coords.push_back(hiddenZ);
+      
+      hidden_coords.push_back(coords);
+    } else {
+      // If there are more than one, arrange in a circle
+      coords.push_back(1);
+      coords.push_back(0);
+      coords.push_back(hiddenZ);
+      
+      double cur_angle = 0;
+      
+      // How many neurons per full rotation?
+      double angle_step = 2 * M_PI / num_hidden_start_neurons;
+      
+      for (int i = 0; i < num_hidden_start_neurons - 1; i++) {
+	// Push back coordinates, rotate by the angle step each iteration
+	hidden_coords.push_back(coords);
+	
+	std::vector<double> coords_new;
+	
+	coords_new.push_back(coords.at(0) * cos(angle_step) + coords.at(1) * sin(angle_step));
+	coords_new.push_back(coords.at(1) * cos(angle_step) - coords.at(0) * sin(angle_step));
+	coords_new.push_back(hiddenZ);
+
+	coords = coords_new;
+      }
+    }
+  }
+  
   for (std::vector<std::shared_ptr<RangeFinderSensor>>::iterator it = rfsensors->begin(); it != rfsensors->end(); ++it)
   {
     Vector v = (*it)->get_offset();
@@ -242,24 +284,6 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     
   }
   
-  for (std::vector<std::shared_ptr<PieSliceSensor>>::iterator it = pssensors->begin(); it != pssensors->end(); ++it)
-  {
-    Vector v1 = (*it)->get_offset();
-    Vector v2 = (*it)->get_offset2();
-    
-    // Get middle point of the PieSliceSensor
-    // Divide by three because both vectors form a triangle with (0, 0) as the third point
-    int x = abs((v1.x + v2.x) / 3.0);
-    int y = abs((v1.y + v2.y) / 3.0);
-    
-    if (x > maxX)
-      maxX = x;
-    
-    if (y > maxY)
-      maxY = y;
-    
-  }
-    
   for (std::vector<std::shared_ptr<RangeFinderSensor>>::iterator it = rfsensors->begin(); it != rfsensors->end(); ++it)
   {
     std::vector<double> coords;
@@ -272,6 +296,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     
     coords.push_back(v.x);
     coords.push_back(v.y);
+    
+    if (num_hidden_start_neurons > 0) coords.push_back(inputZ);
     
     input_coords.push_back(coords);
   }
@@ -288,6 +314,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     coords.push_back(v.x);
     coords.push_back(v.y);
     
+    if (num_hidden_start_neurons > 0) coords.push_back(inputZ);
+    
     input_coords.push_back(coords);
   }
   
@@ -301,6 +329,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     // Same procedure as above, third point is (0, 0)    
     coords.push_back(((v1.x + v2.x) / 3.0) / (double) maxX);
     coords.push_back(((v1.y + v2.y) / 3.0) / (double) maxY);
+    if (num_hidden_start_neurons > 0) coords.push_back(inputZ);
     
     input_coords.push_back(coords);
   }
@@ -308,12 +337,10 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   std::vector<double> bias;
   bias.push_back(0);
   bias.push_back(0);
+  if (num_hidden_start_neurons > 0) bias.push_back(inputZ);
   
   input_coords.push_back(bias);
-  
-  
-  // TODO: Arrange hidden neurons in a circle around Tux, seems like a good idea
-  
+    
   std::vector<double> output;
   
   // Arrange output substrate coordinates around Tux
@@ -322,6 +349,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   // UP
   output.push_back(0);
   output.push_back(1);
+  if (num_hidden_start_neurons > 0) output.push_back(outputZ);
   
   output_coords.push_back(output);
   output.clear();
@@ -329,6 +357,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   // DOWN
   output.push_back(0);
   output.push_back(-1);
+  if (num_hidden_start_neurons > 0) output.push_back(outputZ);
+
   
   output_coords.push_back(output);
   output.clear();
@@ -336,6 +366,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   // LEFT
   output.push_back(-1);
   output.push_back(0);
+  if (num_hidden_start_neurons > 0) output.push_back(outputZ);
   
   output_coords.push_back(output);
   output.clear();
@@ -343,6 +374,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   // RIGHT
   output.push_back(1);
   output.push_back(0);
+  if (num_hidden_start_neurons > 0) output.push_back(outputZ);
   
   output_coords.push_back(output);
   output.clear();
@@ -350,6 +382,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   // JUMP
   output.push_back(0);
   output.push_back(0.8);
+  if (num_hidden_start_neurons > 0) output.push_back(outputZ);
   
   output_coords.push_back(output);
   output.clear();
@@ -357,6 +390,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   // ACTION
   output.push_back(0);
   output.push_back(0.1);
+  if (num_hidden_start_neurons > 0) output.push_back(outputZ);
   
   output_coords.push_back(output);
   
@@ -378,48 +412,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   substrate.m_hidden_nodes_activation = ActivationFunction::SIGNED_SIGMOID;
   substrate.m_output_nodes_activation = ActivationFunction::UNSIGNED_SIGMOID;
   
-//   params.PopulationSize = 150;
-// 
-//   params.DynamicCompatibility = true;
-//   params.CompatTreshold = 2.0;
-//   params.YoungAgeTreshold = 15;
-//   params.SpeciesMaxStagnation = 100;
-//   params.OldAgeTreshold = 35;
-//   params.MinSpecies = 5;
-//   params.MaxSpecies = 10;
-//   params.RouletteWheelSelection = false;
-// 
-//   params.MutateRemLinkProb = 0.02;
-//   params.RecurrentProb = 0;
-//   params.OverallMutationRate = 0.15;
-//   params.MutateAddLinkProb = 0.08;
-//   params.MutateAddNeuronProb = 0.01;
-//   params.MutateWeightsProb = 0.90;
-//   params.MaxWeight = 8.0;
-//   params.WeightMutationMaxPower = 0.2;
-//   params.WeightReplacementMaxPower = 1.0;
-// 
-//   params.MutateActivationAProb = 0.0;
-//   params.ActivationAMutationMaxPower = 0.5;
-//   params.MinActivationA = 0.05;
-//   params.MaxActivationA = 6.0;
-// 
-//   params.MutateNeuronActivationTypeProb = 0.03;
-// 
-//   params.ActivationFunction_SignedSigmoid_Prob = 0.0;
-//   params.ActivationFunction_UnsignedSigmoid_Prob = 0.0;
-//   params.ActivationFunction_Tanh_Prob = 1.0;
-//   params.ActivationFunction_TanhCubic_Prob = 0.0;
-//   params.ActivationFunction_SignedStep_Prob = 1.0;
-//   params.ActivationFunction_UnsignedStep_Prob = 0.0;
-//   params.ActivationFunction_SignedGauss_Prob = 1.0;
-//   params.ActivationFunction_UnsignedGauss_Prob = 0.0;
-//   params.ActivationFunction_Abs_Prob = 0.0;
-//   params.ActivationFunction_SignedSine_Prob = 1.0;
-//   params.ActivationFunction_UnsignedSine_Prob = 0.0;
-//   params.ActivationFunction_Linear_Prob = 1.0;
-  
-  start_genome = Genome(0, substrate.GetMinCPPNInputs(), 0, 
+  start_genome = Genome(0, substrate.GetMinCPPNInputs(), num_hidden_start_neurons_cppn, 
 	       substrate.GetMinCPPNOutputs(), false, TANH, TANH, 0, params);
   pop = strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 1.0, (using_seed ? seed : (int) time(0)));
 }

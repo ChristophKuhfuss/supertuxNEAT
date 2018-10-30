@@ -31,6 +31,9 @@ void ExperimentParameterParser::load()
       TuxEvolution::seed = (int) d;
     }
     else if (s == "autosaveinterval")		TuxEvolution::autosave_interval = (int) d;
+    
+    else if (s == "numhiddenstartneurons")	TuxEvolution::num_hidden_start_neurons = (int) d;
+    else if (s == "numhiddenstartneuronscppn")	TuxEvolution::num_hidden_start_neurons_cppn = (int) d;
         
     else if (s == "numrangesensors") 		SensorManager::AMOUNT_RANGE_SENSORS = (int) d;
     else if (s == "numdepthsensors") 		SensorManager::AMOUNT_DEPTH_SENSORS = (int) d;
