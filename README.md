@@ -17,9 +17,7 @@ Features:
 - Select training levels or build your own one (this is originally a SuperTux feature)
 - Specify sensor parameters
 - Create own experiment parameter files for sensor and experiment configuration
-
-To do:
-I'm still unsure whether to keep this project able to be run as a standalone or if I should remove that functionality. It's intended to be run by "stneatexperiment" now since there you can configure multiple cores for example.
+- HyperNEAT support
 
 # SuperTux
 
