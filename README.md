@@ -19,6 +19,9 @@ Features:
 - Create own experiment parameter files for sensor and experiment configuration
 - HyperNEAT support
 
+Currently known bugs:
+- When viewing a network that finishes the level, the next replay will be very slow and the net won't act like it did the first time
+
 # SuperTux
 
 [![Build Status](https://travis-ci.org/SuperTux/supertux.svg?branch=master)](https://travis-ci.org/SuperTux/supertux)
