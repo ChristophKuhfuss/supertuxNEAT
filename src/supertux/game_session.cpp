@@ -577,6 +577,7 @@ GameSession::update(float elapsed_time)
 void
 GameSession::finish(bool win)
 {
+  if (!Config::neat_activated) {
   if(end_seq_started)
     return;
   end_seq_started = true;
@@ -589,9 +590,6 @@ GameSession::finish(bool win)
   }
 
   if(win) {
-    if (Config::neat_activated) {
-      evo_interface->on_level_won();
-    }
     if(WorldMap::current())
     {
       WorldMap::current()->finished_level(level.get());
@@ -604,6 +602,9 @@ GameSession::finish(bool win)
   }
 
   ScreenManager::current()->pop_screen();
+  } else {
+    evo_interface->on_level_won();
+  }
 }
 
 void

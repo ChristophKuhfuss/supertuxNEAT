@@ -11,6 +11,8 @@ int SensorManager::SPACING_DEPTH_SENSORS = 64;
 
 int SensorManager::AMOUNT_PIESLICE_SENSORS = 5;
 
+bool SensorManager::DRAW_SENSORS = false;
+
 SensorManager* SensorManager::instance;
 
 

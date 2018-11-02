@@ -39,13 +39,15 @@ void RangeFinderSensor::update(float elapsed_time)
 
 void RangeFinderSensor::draw(DrawingContext& context)
 {
-  int posX = tux->get_bbox().get_middle().x;
-  int posY = tux->get_bbox().get_middle().y + offset.y;
-  
-  int layer = 401;
-  
-  if (value > 0)
-    layer++;
-  
-  context.draw_line(Vector(posX, posY), Vector(posX + length, posY), Color(0, 1.0 * value, 0), layer);
+  if (DRAW_SENSORS) {
+    int posX = tux->get_bbox().get_middle().x;
+    int posY = tux->get_bbox().get_middle().y + offset.y;
+    
+    int layer = 401;
+    
+    if (value > 0)
+      layer++;
+    
+    context.draw_line(Vector(posX, posY), Vector(posX + length, posY), Color(0, 1.0 * value, 0), layer);
+  }
 }

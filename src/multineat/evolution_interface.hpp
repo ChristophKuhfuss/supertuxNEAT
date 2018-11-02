@@ -15,6 +15,8 @@
 #include "object/player.hpp"
 #include "scripting/functions.hpp"
 
+#include <math.h>
+
 using namespace NEAT;
 
 class GameSession;
@@ -29,6 +31,8 @@ private:
   static float TIMEOUT;
   static float FITNESS_TIMEOUT;
   static float SEND_THRESHOLD;
+  
+  static int MAX_JUMP_TICKS;
   
 private:
   GameSession* cur_session;
@@ -52,6 +56,10 @@ private:
   int ticks_right;
   int ticks_jump;
   int ticks_action;
+  
+  int remaining_jump_ticks;
+  
+  bool jump_skip_next_frame;
   
 public:
   EvolutionInterface(GameSession* session, std::shared_ptr<SensorManager> sensor_manager);

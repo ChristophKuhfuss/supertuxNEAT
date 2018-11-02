@@ -45,7 +45,9 @@ void DepthFinderSensor::update(float elapsed_time)
 
 void DepthFinderSensor::draw(DrawingContext& context)
 {
-  int posX = tux->get_bbox().get_middle().x + offset.x;
-  int posY = tux->get_bbox().get_middle().y + offset.y;
-  context.draw_line(Vector(posX, posY), Vector(posX, posY + length), Color(0, 0, 1.0 * value), 401);
+  if (DRAW_SENSORS) {
+    int posX = tux->get_bbox().get_middle().x + offset.x;
+    int posY = tux->get_bbox().get_middle().y + offset.y;
+    context.draw_line(Vector(posX, posY), Vector(posX, posY + length), Color(0, 0, 1.0 * value), 401);
+  }
 }

@@ -16,6 +16,7 @@
 
 class Sensor : public GameObject {
   friend class ExperimentParameterParser;
+  friend class CommandLineArguments;
   
 public:
   Sensor(Sector* sec, int offsetX, int offsetY);
@@ -29,6 +30,8 @@ protected:
   SpritePtr sprite;
   Vector offset;
   double value;
+  
+  static bool DRAW_SENSORS;
   
 public:
   Vector get_offset() { return offset; };

@@ -5,6 +5,8 @@ float EvolutionInterface::TIMEOUT = 1.0f;
 float EvolutionInterface::FITNESS_TIMEOUT = 3.0f;
 float EvolutionInterface::SEND_THRESHOLD = 0.7f;
 
+int EvolutionInterface::MAX_JUMP_TICKS = 35;
+
 EvolutionInterface::EvolutionInterface(GameSession* session, std::shared_ptr<SensorManager> sensor_manager) :
 cur_session(session),
 sensor_manager(sensor_manager),
@@ -19,7 +21,9 @@ ticks_up(0),
 ticks_left(0),
 ticks_right(0),
 ticks_jump(0),
-ticks_action(0)
+ticks_action(0),
+remaining_jump_ticks(0),
+jump_skip_next_frame(false)
 {
 }
 
@@ -62,7 +66,7 @@ NeatInputs EvolutionInterface::generate_inputs()
     for (it = sensors->begin(); it != sensors->end(); ++it) {
       inputs.push_back((*it)->getValue());
     }
-        
+            
     NeatInputs res;
     res.sensors = inputs;
     
@@ -84,10 +88,33 @@ void EvolutionInterface::send_inputs(NeatInputs inputs)
 void EvolutionInterface::send_outputs() 
 {
   controller->update();
+  controller->reset();
+  // Only calculate new remaining jump ticks if we don't have to skip and the threshold is right
+  if (outputs.jump >= SEND_THRESHOLD) {
+    if (!jump_skip_next_frame) {
+      if (TuxEvolution::debug) {
+	std::cerr << "Button:J" << std::endl;
+      }
+      
+      if (!remaining_jump_ticks &&  !jump_skip_next_frame) 
+	remaining_jump_ticks = (int) std::max(0.0, MAX_JUMP_TICKS * (outputs.jump - SEND_THRESHOLD) / (1.0 - SEND_THRESHOLD));
+    } else {
+      jump_skip_next_frame = false;
+    }
+  }
+    
+  if (remaining_jump_ticks > 0) {
+    controller->press(Controller::JUMP);
+    ticks_jump++;
+    remaining_jump_ticks--;
+    if (remaining_jump_ticks == 0) jump_skip_next_frame = true;
+  }
+  
   if (outputs.direction_up >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
       std::cerr << "Button:U" << std::endl;
     }
+
     controller->press(Controller::UP);
     ticks_up++;
   }
@@ -96,9 +123,10 @@ void EvolutionInterface::send_outputs()
     if (TuxEvolution::debug) {
       std::cerr << "Button:D" << std::endl;
     }
+
     controller->press(Controller::DOWN);
     ticks_down++;
-  }
+   }
   
   if (outputs.direction_left >= SEND_THRESHOLD) {
     if (TuxEvolution::debug) {
@@ -113,7 +141,7 @@ void EvolutionInterface::send_outputs()
     if (TuxEvolution::debug) {
       std::cerr << "Button:R" << std::endl;
     }
-
+    
     controller->press(Controller::RIGHT);
     ticks_right++;
   }
@@ -122,17 +150,8 @@ void EvolutionInterface::send_outputs()
     if (TuxEvolution::debug) {
       std::cerr << "Button:A" << std::endl;
     }
-
     controller->press(Controller::ACTION);
     ticks_action++;
-  }
-  
-  if (outputs.jump >= SEND_THRESHOLD) {
-    if (TuxEvolution::debug) {
-      std::cerr << "Button:J" << std::endl;
-    }
-    controller->press(Controller::JUMP);
-    ticks_jump++;
   }
 }
 
@@ -144,6 +163,9 @@ void EvolutionInterface::on_tux_death()
   
   sensor_manager->clearSensors();
   controller->reset();
+  
+  remaining_jump_ticks = 0;
+  jump_skip_next_frame = false;
   
   OutputQuotas q = {0, 0, 0, 0, 0, 0};
   

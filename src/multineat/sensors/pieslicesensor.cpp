@@ -44,16 +44,19 @@ void PieSliceSensor::update(float elapsed_time)
 
 void PieSliceSensor::draw(DrawingContext& context)
 {
-  Vector pos1(tux->get_pos().x, tux->get_pos().y);
-  Vector pos2(tux->get_pos().x + radius, tux->get_pos().y);
-  
-  Color color(std::min(1 * value, 1.0), 0, 0);
-  
-  int layer = 401;
-  if (value > 0) layer++;
-   
-  context.draw_line(tux->get_bbox().get_middle(), tux->get_bbox().get_middle() + offset, color, layer);
-  context.draw_line(tux->get_bbox().get_middle(), tux->get_bbox().get_middle() + offset2, color, layer);
+  if (DRAW_SENSORS) {
+    Vector pos1(tux->get_pos().x, tux->get_pos().y);
+    Vector pos2(tux->get_pos().x + radius, tux->get_pos().y);
+    
+    Color color(std::min(1 * value, 1.0), 0, 0);
+    
+    int layer = 401;
+    if (value > 0) layer++;
+    
+    context.draw_line(tux->get_bbox().get_middle(), tux->get_bbox().get_middle() + offset, color, layer);
+    context.draw_line(tux->get_bbox().get_middle(), tux->get_bbox().get_middle() + offset2, color, layer);
+    context.draw_line(tux->get_bbox().get_middle() + offset, tux->get_bbox().get_middle() + offset2, color, layer);
+  }
 }
 
 Vector PieSliceSensor::rotate_point(const Vector& point, double rad)

@@ -140,6 +140,7 @@ void
 CommandLineArguments::parse_args(int argc, char** argv)
 {
   bool visualmode = false;
+  bool view_genome = false;
   
   for(int i = 1; i < argc; ++i)
   {
@@ -510,7 +511,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
 	throw std::runtime_error("Cannot specify a genome to view without loading population from file");
       }
       
-      Config::neat_headless_mode = false;
+      view_genome = true;
       
       int genomeid = -1;
       if (i + 1 < argc && sscanf(argv[i + 1], "%d", &genomeid) == 1) 
@@ -597,6 +598,10 @@ CommandLineArguments::parse_args(int argc, char** argv)
       
       TuxEvolution::hyperneat = true;
     }
+    else if (arg == "--drawsensors")
+    {
+      Sensor::DRAW_SENSORS = true;
+    }
     else if (arg[0] != '-')
     {
       start_level = arg;
@@ -609,7 +614,7 @@ CommandLineArguments::parse_args(int argc, char** argv)
   
   if (m_action != START_EVOLUTION)
       Config::neat_headless_mode = false;
-  else if (!visualmode)
+  else if (!visualmode && !view_genome)
       Config::neat_headless_mode = true;
 }
 

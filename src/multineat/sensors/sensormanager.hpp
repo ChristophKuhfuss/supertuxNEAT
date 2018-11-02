@@ -24,6 +24,8 @@ private:
   
   // This should be an odd number so we get a center/front pie slice
   static int AMOUNT_PIESLICE_SENSORS;
+  
+  static bool DRAW_SENSORS;
 public:
   SensorManager(GameSession* session);
   ~SensorManager();

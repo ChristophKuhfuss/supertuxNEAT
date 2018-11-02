@@ -1,6 +1,8 @@
 #include "sensor.hpp"
 #include <object/brick.hpp>
 
+bool Sensor::DRAW_SENSORS = false;
+
 Sensor::Sensor(Sector* sec, int offsetX, int offsetY) :
 sec(sec),
 tux(sec->player),
