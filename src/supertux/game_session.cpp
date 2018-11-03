@@ -119,6 +119,10 @@ GameSession::reset_level()
 int
 GameSession::restart_level(bool after_death)
 {
+  // This is neccessary because otherwise, all other plays of the level will be at half speed after an end sequence finished
+  ScreenManager::current()->set_speed(1.0f);
+
+  
   PlayerStatus* currentStatus = m_savegame.get_player_status();
 
   if (!Config::neat_activated) {
@@ -207,18 +211,7 @@ GameSession::restart_level(bool after_death)
     
     evo_interface->init();
     currentsector->add_object(evo_interface);
-    
-//     int middle = (TuxEvolution::sensor_grid_padding * TuxEvolution::sensor_grid_size) / 2;
-//     for (int i = 0; i < TuxEvolution::sensor_grid_size; i++) {
-//       for (int j = 0; j < TuxEvolution::sensor_grid_size; j++) {
-// 	std::shared_ptr<Sensor> sensor = std::make_shared<Sensor>(currentsector, i * TuxEvolution::sensor_grid_padding - middle, 
-// 	  j * TuxEvolution::sensor_grid_padding - middle);
-// 	currentsector->add_object(sensor);
-// 	evo_interface->add_sensor(sensor);
-//       }
-//     }
   }
-  
   return (0);
 }
 
@@ -577,7 +570,6 @@ GameSession::update(float elapsed_time)
 void
 GameSession::finish(bool win)
 {
-  if (!Config::neat_activated) {
   if(end_seq_started)
     return;
   end_seq_started = true;
@@ -601,9 +593,13 @@ GameSession::finish(bool win)
     }
   }
 
-  ScreenManager::current()->pop_screen();
-  } else {
-    evo_interface->on_level_won();
+  if (!Config::neat_activated)
+    ScreenManager::current()->pop_screen();
+  else {
+    // Set end_seq_started to false so we can reuse this GameSession object
+    // Otherwise, when a second net finishes the level on the same GS object, the end sequence won't stop playing
+    end_seq_started = false;
+    evo_interface.get()->on_level_won();
   }
 }
 
