@@ -61,6 +61,8 @@ private:
   
   bool jump_skip_next_frame;
   
+  int num_jumps;
+  
 public:
   EvolutionInterface(GameSession* session, std::shared_ptr<SensorManager> sensor_manager);
   ~EvolutionInterface();

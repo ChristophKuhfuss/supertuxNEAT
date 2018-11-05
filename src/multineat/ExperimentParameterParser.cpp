@@ -48,6 +48,10 @@ void ExperimentParameterParser::load()
     else if (s == "timeout")			EvolutionInterface::TIMEOUT = d;
     else if (s == "fitnesstimeout")		EvolutionInterface::FITNESS_TIMEOUT = d;
     else if (s == "sendthreshold")		EvolutionInterface::SEND_THRESHOLD = d;
+    
+    else if (s == "regularizejumps")	
+      if ((int) d)				TuxEvolution::regularize_jumps = true;
+      else 					TuxEvolution::regularize_jumps = false;
   }
 }
 

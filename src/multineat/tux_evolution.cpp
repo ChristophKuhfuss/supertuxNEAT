@@ -38,6 +38,8 @@ int TuxEvolution::current_gen = 0;
 int TuxEvolution::max_db_retry = 100;
 int TuxEvolution::db_sleeptime = 50;
 
+bool TuxEvolution::regularize_jumps = true;
+
 TuxEvolution::TuxEvolution() : params(init_params()),
   start_genome(0, SensorManager::get_total_sensor_count() + 1, num_hidden_start_neurons, 
 	       6, false, UNSIGNED_SIGMOID, UNSIGNED_SIGMOID, 1, params),
@@ -127,9 +129,9 @@ bool TuxEvolution::tux_epoch()
 
 // Calculates fitness of current genome and marks the evaluated flag
 // Returns the result of advance_genome(), which is false if the simulation finished
-bool TuxEvolution::on_tux_death(float progress, OutputQuotas q)
+bool TuxEvolution::on_tux_death(float progress, int num_jumps, OutputQuotas q)
 {
-  double fitness = tux_evaluate(progress);
+  double fitness = tux_evaluate(progress, num_jumps);
 //   std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << fitness << "." << std::endl;
   
   if (!viewing_mode) {
@@ -138,14 +140,18 @@ bool TuxEvolution::on_tux_death(float progress, OutputQuotas q)
     update_db(cur_genome->GetID(), fitness, q);
     return advance_genome();
   } else {
-    cur_network.Flush();
+    get_genome_from_iterator();
     return true;
   }
 }
 
-double TuxEvolution::tux_evaluate(float progress)
+double TuxEvolution::tux_evaluate(float progress, int num_jumps)
 {
   float fitness = progress;
+  
+  if (regularize_jumps)
+    fitness = std::max(0.0, (double) fitness - num_jumps);
+  
   if (fitness > top_fitness) {
     top_fitness = fitness;
   }
@@ -414,7 +420,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   
   start_genome = Genome(0, substrate.GetMinCPPNInputs(), num_hidden_start_neurons_cppn, 
 	       substrate.GetMinCPPNOutputs(), false, TANH, TANH, 0, params);
-  pop = strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 1.0, (using_seed ? seed : (int) time(0)));
+  pop = strcmp(filename, "") ? Population(filename) : Population(start_genome, params, true, 2.0, (using_seed ? seed : (int) time(0)));
 }
 
 

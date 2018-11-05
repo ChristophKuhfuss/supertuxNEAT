@@ -23,7 +23,10 @@ ticks_right(0),
 ticks_jump(0),
 ticks_action(0),
 remaining_jump_ticks(0),
-jump_skip_next_frame(false)
+jump_skip_next_frame(false),
+num_jumps(0),
+idle(0),
+fitness_idle(0)
 {
 }
 
@@ -35,6 +38,7 @@ EvolutionInterface::~EvolutionInterface()
 
 void EvolutionInterface::init()
 {
+  controller->reset();
   cur_sector = cur_session->get_current_sector();
   tux = cur_sector->player;
   tux->set_controller(controller.get());
@@ -89,15 +93,14 @@ void EvolutionInterface::send_outputs()
 {
   controller->update();
   controller->reset();
+  
   // Only calculate new remaining jump ticks if we don't have to skip and the threshold is right
   if (outputs.jump >= SEND_THRESHOLD) {
     if (!jump_skip_next_frame) {
-      if (TuxEvolution::debug) {
-	std::cerr << "Button:J" << std::endl;
-      }
-      
-      if (!remaining_jump_ticks &&  !jump_skip_next_frame) 
+      if (!remaining_jump_ticks &&  !jump_skip_next_frame) {
 	remaining_jump_ticks = (int) std::max(0.0, MAX_JUMP_TICKS * (outputs.jump - SEND_THRESHOLD) / (1.0 - SEND_THRESHOLD));
+	num_jumps++;
+      }
     } else {
       jump_skip_next_frame = false;
     }
@@ -111,56 +114,33 @@ void EvolutionInterface::send_outputs()
   }
   
   if (outputs.direction_up >= SEND_THRESHOLD) {
-    if (TuxEvolution::debug) {
-      std::cerr << "Button:U" << std::endl;
-    }
-
     controller->press(Controller::UP);
     ticks_up++;
   }
   
   if (outputs.direction_down >= SEND_THRESHOLD) {
-    if (TuxEvolution::debug) {
-      std::cerr << "Button:D" << std::endl;
-    }
-
     controller->press(Controller::DOWN);
     ticks_down++;
    }
   
   if (outputs.direction_left >= SEND_THRESHOLD) {
-    if (TuxEvolution::debug) {
-      std::cerr << "Button:L" << std::endl;
-    }
-
     controller->press(Controller::LEFT);
     ticks_left++;
   }
   
   if (outputs.direction_right >= SEND_THRESHOLD) {
-    if (TuxEvolution::debug) {
-      std::cerr << "Button:R" << std::endl;
-    }
-    
     controller->press(Controller::RIGHT);
     ticks_right++;
   }
   
   if (outputs.action >= SEND_THRESHOLD) {
-    if (TuxEvolution::debug) {
-      std::cerr << "Button:A" << std::endl;
-    }
     controller->press(Controller::ACTION);
     ticks_action++;
   }
 }
 
 void EvolutionInterface::on_tux_death()
-{
-  if (TuxEvolution::debug) {
-    std::cerr << "-------------------------------" << std::endl;
-  }
-  
+{  
   sensor_manager->clearSensors();
   controller->reset();
   
@@ -178,7 +158,7 @@ void EvolutionInterface::on_tux_death()
     q.qAction = ticks_action / (double) ticks_total;
   }
   
-  if (!neat.on_tux_death(tux->get_pos().x, q)) {
+  if (!neat.on_tux_death(tux->get_pos().x, num_jumps, q)) {
     scripting::quit();
   }
   
@@ -193,14 +173,15 @@ void EvolutionInterface::on_tux_death()
   ticks_jump = 0;
   ticks_action = 0;
   ticks_total = 0; 
+  
+  num_jumps = 0;
 }
 
 void EvolutionInterface::on_level_won()
 {
   std::cout << "Organism #" << neat.get_current_genome_id() << " finished the level!" << std::endl;
   neat.on_level_won();
-  on_tux_death();
-  cur_session->restart_level(false);
+  cur_session->restart_level(true);
 }
 
 
@@ -222,10 +203,8 @@ void EvolutionInterface::update_idle(float elapsed_time)
 }
 
 void EvolutionInterface::timeout() 
-{
-  on_tux_death();
-  
-  cur_session->restart_level(false);
+{  
+  cur_session->restart_level(true);
 }
 
 void EvolutionInterface::add_sensor(std::shared_ptr<Sensor> s)
@@ -246,13 +225,20 @@ void EvolutionInterface::save(Writer& writer)
 
 void EvolutionInterface::debug_print()
 {
-  std::cerr << "Tux:" << tux->get_pos().x << "," << tux->get_pos().y << std::endl;
-  for (int i = 0; i < sensors->size(); i++) {
-    Sensor s = *((*sensors)[i]);
-    std::cerr << s.getValue();
-  }
-  
-  std::cerr << std::endl;
+//   std::stringstream ss;
+//   ss << debug_filename << debug_filename_number;
+//   std::ofstream os;
+//   
+//   os.open(ss.str(), std::ofstream::out | std::ofstream::app);
+//   
+//   os << "Tux:" << tux->get_pos().x << "," << tux->get_pos().y << std::endl;
+//   os << "Inputs: ";
+//   for (int i = 0; i < sensors->size(); i++) {
+//     Sensor s = *((*sensors)[i]);
+//     os << s.getValue() << " ";
+//   }
+//   
+//   os << std::endl;
 }
 
 

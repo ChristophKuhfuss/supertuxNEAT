@@ -52,7 +52,7 @@ class TuxEvolution {
   friend class ExperimentParameterParser;
   
 public:
-  static const bool debug = false;
+  static const bool debug = true;
   
   static int from_genome_id;
   static int to_genome_id;
@@ -82,6 +82,8 @@ public:
   static int current_gen;
   
   static bool hyperneat;
+  
+  static bool regularize_jumps;
 
 private:
   Parameters params;
@@ -108,7 +110,7 @@ public:
   TuxEvolution();
   ~TuxEvolution();
     
-  bool on_tux_death(float progress, OutputQuotas q);
+  bool on_tux_death(float progress, int num_jumps, OutputQuotas q);
   void accept_inputs(NeatInputs inputs);
   NeatOutputs get_outputs();
   
@@ -123,7 +125,7 @@ public:
 private:
   static Parameters init_params();
   bool tux_epoch();
-  double tux_evaluate(float progress);
+  double tux_evaluate(float progress, int num_jumps);
   void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();

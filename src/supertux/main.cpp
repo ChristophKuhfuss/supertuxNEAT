@@ -66,6 +66,11 @@ extern "C" {
 
 #include "multineat/ExperimentParameterParser.hpp"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <execinfo.h>
+#include <cxxabi.h>
+
 class ConfigSubsystem
 {
 public:
@@ -432,8 +437,14 @@ Main::launch_game()
       std::unique_ptr<GameSession> session (
         new GameSession(filename, *default_savegame));
 
-      g_config->random_seed = session->get_demo_random_seed(g_config->start_demo);
-      g_config->random_seed = gameRandom.srand(g_config->random_seed);
+      if (!Config::neat_activated) {
+	// If NEAT isn't active, set seed as usual
+	g_config->random_seed = session->get_demo_random_seed(g_config->start_demo);
+	g_config->random_seed = gameRandom.srand(g_config->random_seed);
+      } else {
+	// If it is, we want to use the same seed every time
+	g_config->random_seed = gameRandom.srand(12345);
+      }
       graphicsRandom.srand(0);
 
       if (g_config->tux_spawn_pos)

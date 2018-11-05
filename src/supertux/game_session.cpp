@@ -120,9 +120,10 @@ int
 GameSession::restart_level(bool after_death)
 {
   // This is neccessary because otherwise, all other plays of the level will be at half speed after an end sequence finished
-  ScreenManager::current()->set_speed(1.0f);
+//   ScreenManager::current()->set_speed(1.0f);
+  if (Config::neat_activated)
+    g_config->random_seed = gameRandom.srand(12345);
 
-  
   PlayerStatus* currentStatus = m_savegame.get_player_status();
 
   if (!Config::neat_activated) {
@@ -131,7 +132,6 @@ GameSession::restart_level(bool after_death)
     max_fire_bullets_at_start = currentStatus->max_fire_bullets;
     max_ice_bullets_at_start = currentStatus->max_ice_bullets;
   } else {
-    g_config->random_seed = gameRandom.srand(12345);
     coins_at_start = 100;
     bonus_at_start = NO_BONUS;
     max_fire_bullets_at_start = 0;
@@ -659,8 +659,10 @@ GameSession::start_sequence(Sequence seq)
     return;
   }
 
-  /* slow down the game for end-sequence */
-  ScreenManager::current()->set_speed(0.5f);
+  if (!Config::neat_activated) {
+    /* slow down the game for end-sequence */
+    ScreenManager::current()->set_speed(0.5f);
+  }
 
   currentsector->add_object(end_sequence);
   end_sequence->start();
