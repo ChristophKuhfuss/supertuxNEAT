@@ -62,7 +62,7 @@ vector<shared_ptr<Sensor>>* SensorManager::get_cur_sensors()
 
 int SensorManager::get_total_sensor_count()
 {
-  return AMOUNT_RANGE_SENSORS + AMOUNT_DEPTH_SENSORS + AMOUNT_PIESLICE_SENSORS;
+  return AMOUNT_RANGE_SENSORS + AMOUNT_DEPTH_SENSORS + AMOUNT_PIESLICE_SENSORS * 2;
 }
 
 
@@ -102,6 +102,12 @@ void SensorManager::create_pieslice_sensors(bool add_to_sector)
     if (add_to_sector) sec->add_object(sensor);
     cur_sensors->push_back(sensor);
     cur_pieslice_sensors->push_back(sensor);
+    
+    std::shared_ptr<PieSliceSensorSpecial> sensor2 = (add_to_sector? std::make_shared<PieSliceSensorSpecial>(sec, cur_angle, cur_angle + angle_step) : std::make_shared<PieSliceSensorSpecial>(cur_angle, cur_angle + angle_step));
+    if (add_to_sector) sec->add_object(sensor2);
+    cur_sensors->push_back(sensor2);
+    cur_pieslice_sensors->push_back(sensor2);
+    
     cur_angle += angle_step;
   }
 }

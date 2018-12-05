@@ -31,6 +31,7 @@ void PieSliceSensor::update(float elapsed_time)
   std::vector<BadGuy*> badguys = sec->get_nearby_enemies(tux->get_bbox().get_middle(), radius);
   
   for (BadGuy* bg : badguys) {
+    if (bg->get_class() == "jumpy") continue;
     double angle_e = get_rad(bg->get_pos() - tux->get_pos(), Vector(1, 0));
         
     // The second case is special because angle1 is only greater than angle2 if the sensor overlaps the x axis
@@ -50,7 +51,7 @@ void PieSliceSensor::draw(DrawingContext& context)
     
     Color color(std::min(1 * value, 1.0), 0, 0);
     
-    int layer = 401;
+    int layer = 402;
     if (value > 0) layer++;
     
     context.draw_line(tux->get_bbox().get_middle(), tux->get_bbox().get_middle() + offset, color, layer);

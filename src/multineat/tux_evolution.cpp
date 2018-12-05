@@ -38,7 +38,9 @@ int TuxEvolution::current_gen = 0;
 int TuxEvolution::max_db_retry = 100;
 int TuxEvolution::db_sleeptime = 50;
 
-bool TuxEvolution::regularize_jumps = true;
+bool TuxEvolution::regularize_jumps = false;
+bool TuxEvolution::regularize_airtime = false;
+bool TuxEvolution::reward_groundtime = false;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
   start_genome(0, SensorManager::get_total_sensor_count() + 1, num_hidden_start_neurons, 
@@ -47,7 +49,8 @@ TuxEvolution::TuxEvolution() : params(init_params()),
   top_fitness(0),
   top_fitness_genome_id(-1),
   cur_outputs(),
-  cur_inputs()
+  cur_inputs(),
+  won(false)
 {
   pop.m_RNG.Seed(seed);
   
@@ -129,28 +132,35 @@ bool TuxEvolution::tux_epoch()
 
 // Calculates fitness of current genome and marks the evaluated flag
 // Returns the result of advance_genome(), which is false if the simulation finished
-bool TuxEvolution::on_tux_death(float progress, int num_jumps, OutputQuotas q)
+bool TuxEvolution::on_tux_death(float progress, float airtime, float groundtime, int num_jumps, OutputQuotas q)
 {
-  double fitness = tux_evaluate(progress, num_jumps);
+  double fitness = tux_evaluate(progress, airtime, groundtime, num_jumps);
 //   std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << fitness << "." << std::endl;
   
   if (!viewing_mode) {
     //Only set fitness - adjfitness is set by species on pop.Epoch()
     cur_genome->SetFitness(fitness);
-    update_db(cur_genome->GetID(), fitness, q);
+    update_db(cur_genome->GetID(), fitness, airtime, groundtime, num_jumps, q);
     return advance_genome();
   } else {
-    get_genome_from_iterator();
+    cur_network.Flush();
+//     get_genome_from_iterator();
     return true;
   }
 }
 
-double TuxEvolution::tux_evaluate(float progress, int num_jumps)
+double TuxEvolution::tux_evaluate(float progress, float airtime, float groundtime, int num_jumps)
 {
   float fitness = progress;
   
+  if (regularize_airtime)
+    fitness = std::max(0.0, (double) fitness - airtime * 10);
+  
   if (regularize_jumps)
-    fitness = std::max(0.0, (double) fitness - num_jumps);
+    fitness = std::max(0.0, (double) fitness - num_jumps * 5);
+  
+  if (reward_groundtime)
+    fitness += groundtime * 20;
   
   if (fitness > top_fitness) {
     top_fitness = fitness;
@@ -459,6 +469,8 @@ int TuxEvolution::get_generation_number()
 // Takes the next genome from the iterator and builds the network accordingly
 void TuxEvolution::get_genome_from_iterator()
 {
+  won = false;
+  
   cur_genome = *it;
   
   // If we don't clear the network first, we'll run into some bad problems with HyperNEAT
@@ -473,11 +485,12 @@ void TuxEvolution::get_genome_from_iterator()
 // Just to make sure we don't lose winners
 void TuxEvolution::on_level_won()
 {
+  won = true;
 //   save_pop();
 }
 
 // For each genome, update the row in the current db table with the right fitness value
-void TuxEvolution::update_db(int genome_id, float fitness, OutputQuotas q)
+void TuxEvolution::update_db(int genome_id, float fitness, float airtime, float groundtime, int num_jumps, OutputQuotas q)
 {
   sqlite3* db;  
   
@@ -489,15 +502,21 @@ void TuxEvolution::update_db(int genome_id, float fitness, OutputQuotas q)
   std::stringstream ss;
     
   ss << "UPDATE gen" << current_gen << " SET fitness = " << fitness << 
+	", airtime = " << airtime <<
+	", groundtime = " << groundtime <<
+	", num_jumps = " << num_jumps <<
 	", qLeft = " << q.qLeft <<
 	", qRight = " << q.qRight <<
 	", qUp = " << q.qUp <<
 	", qDown = " << q.qDown <<
 	", qJump = " << q.qJump <<
 	", qAction = " << q.qAction << 
+	", won = " << (won ? "1" : "0") <<
 	" WHERE id = " << genome_id << ";";
         
   sqlite3_exec(db, ss.str().c_str(), 0, 0, &err);
+  
+  std::cout << err << std::endl;
   
   sqlite3_close(db);
 }
@@ -541,7 +560,7 @@ void TuxEvolution::set_viewing_genome()
   
   if (it == remaining_genomes.end()) {
     std::ostringstream ss;
-    ss << "Couldn't find genome with ID " << view_genome_id;
+    ss << "Couldn't find genome with ID " << view_genome_id << ". Exiting" << std::endl;
     
     throw std::runtime_error(ss.str());
   } else {

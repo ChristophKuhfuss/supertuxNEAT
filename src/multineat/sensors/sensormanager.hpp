@@ -5,6 +5,7 @@
 #include "multineat/sensors/rangefindersensor.hpp"
 #include "multineat/sensors/depthfindersensor.hpp"
 #include "multineat/sensors/pieslicesensor.hpp"
+#include "multineat/sensors/pieslicesensorspecial.hpp"
 #include "supertux/game_session.hpp"
 
 #include <vector>

@@ -56,6 +56,8 @@ private:
   int ticks_right;
   int ticks_jump;
   int ticks_action;
+  int ticks_airtime;
+  int ticks_groundtime;
   
   int remaining_jump_ticks;
   

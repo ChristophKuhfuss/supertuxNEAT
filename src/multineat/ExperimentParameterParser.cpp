@@ -52,6 +52,18 @@ void ExperimentParameterParser::load()
     else if (s == "regularizejumps")	
       if ((int) d)				TuxEvolution::regularize_jumps = true;
       else 					TuxEvolution::regularize_jumps = false;
+      
+    else if (s == "regularizeairtime")
+      if ((int) d)				TuxEvolution::regularize_airtime = true;
+      else					TuxEvolution::regularize_airtime = false;
+      
+    else if (s == "rewardgroundtime")
+      if ((int) d)				TuxEvolution::reward_groundtime = true;
+      else					TuxEvolution::reward_groundtime = false;
+    else if (s == "hyperneat")
+      if ((int) d)				TuxEvolution::hyperneat = true;
+      else					TuxEvolution::hyperneat = false;
+      
   }
 }
 

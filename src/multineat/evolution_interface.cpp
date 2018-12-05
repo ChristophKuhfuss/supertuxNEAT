@@ -22,6 +22,8 @@ ticks_left(0),
 ticks_right(0),
 ticks_jump(0),
 ticks_action(0),
+ticks_airtime(0),
+ticks_groundtime(0),
 remaining_jump_ticks(0),
 jump_skip_next_frame(false),
 num_jumps(0),
@@ -52,7 +54,12 @@ void EvolutionInterface::update(float elapsed_time)
     debug_print();
   
   ticks_total++;
+  
+  if (!tux->on_ground()) ticks_airtime++;
+  else ticks_groundtime++;
+  
   update_idle(elapsed_time);
+  
   if (idle < TIMEOUT && fitness_idle < FITNESS_TIMEOUT) {
     send_inputs(generate_inputs());
     outputs = neat.get_outputs();
@@ -97,9 +104,11 @@ void EvolutionInterface::send_outputs()
   // Only calculate new remaining jump ticks if we don't have to skip and the threshold is right
   if (outputs.jump >= SEND_THRESHOLD) {
     if (!jump_skip_next_frame) {
-      if (!remaining_jump_ticks &&  !jump_skip_next_frame) {
-	remaining_jump_ticks = (int) std::max(0.0, MAX_JUMP_TICKS * (outputs.jump - SEND_THRESHOLD) / (1.0 - SEND_THRESHOLD));
-	num_jumps++;
+      if (!remaining_jump_ticks && tux->on_ground()) {
+	remaining_jump_ticks = (int) std::min((double) MAX_JUMP_TICKS, std::max(0.0, MAX_JUMP_TICKS * (outputs.jump - SEND_THRESHOLD) / (0.95 - SEND_THRESHOLD)));
+	
+	if (remaining_jump_ticks)
+	  num_jumps++;
       }
     } else {
       jump_skip_next_frame = false;
@@ -158,7 +167,7 @@ void EvolutionInterface::on_tux_death()
     q.qAction = ticks_action / (double) ticks_total;
   }
   
-  if (!neat.on_tux_death(tux->get_pos().x, num_jumps, q)) {
+  if (!neat.on_tux_death(tux->get_pos().x, ticks_airtime / (float) ticks_total, ticks_groundtime / (float) ticks_total, num_jumps, q)) {
     scripting::quit();
   }
   
@@ -172,6 +181,8 @@ void EvolutionInterface::on_tux_death()
   ticks_right = 0;
   ticks_jump = 0;
   ticks_action = 0;
+  ticks_airtime = 0;
+  ticks_groundtime = 0;
   ticks_total = 0; 
   
   num_jumps = 0;
@@ -179,7 +190,7 @@ void EvolutionInterface::on_tux_death()
 
 void EvolutionInterface::on_level_won()
 {
-  std::cout << "Organism #" << neat.get_current_genome_id() << " finished the level!" << std::endl;
+//   std::cout << "Organism #" << neat.get_current_genome_id() << " finished the level!" << std::endl;
   neat.on_level_won();
   cur_session->restart_level(true);
 }

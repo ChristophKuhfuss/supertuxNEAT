@@ -84,6 +84,8 @@ public:
   static bool hyperneat;
   
   static bool regularize_jumps;
+  static bool regularize_airtime;
+  static bool reward_groundtime;
 
 private:
   Parameters params;
@@ -105,12 +107,14 @@ private:
   static int db_sleeptime;
   
   SensorManager* sm;
+  
+  bool won;
 
 public:
   TuxEvolution();
   ~TuxEvolution();
     
-  bool on_tux_death(float progress, int num_jumps, OutputQuotas q);
+  bool on_tux_death(float progress, float airtime, float groundtime, int num_jumps, OutputQuotas q);
   void accept_inputs(NeatInputs inputs);
   NeatOutputs get_outputs();
   
@@ -125,7 +129,7 @@ public:
 private:
   static Parameters init_params();
   bool tux_epoch();
-  double tux_evaluate(float progress, int num_jumps);
+  double tux_evaluate(float progress, float airtime, float groundtime, int num_jumps);
   void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();
@@ -135,7 +139,7 @@ private:
   void save_pop();
   void set_viewing_genome();
   
-  void update_db(int genome_id, float fitness, OutputQuotas q);
+  void update_db(int genome_id, float fitness, float airtime, float groundtime, int num_jumps, OutputQuotas q);
   static int busy_handler(void* data, int retry);
 };
 
