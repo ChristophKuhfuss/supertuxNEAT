@@ -45,6 +45,7 @@ private:
   NeatOutputs outputs;
   TuxEvolution neat;
   Vector last_known_playerpos;
+  
   float idle;
   float fitness_idle;
   float max_x;
@@ -58,6 +59,8 @@ private:
   int ticks_action;
   int ticks_airtime;
   int ticks_groundtime;
+  
+  int ground_distance;
   
   int remaining_jump_ticks;
   

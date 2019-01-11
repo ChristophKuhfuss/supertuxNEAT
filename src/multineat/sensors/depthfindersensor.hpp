@@ -7,7 +7,7 @@
 class DepthFinderSensor : public Sensor {
   friend class ExperimentParameterParser;
   
-protected:
+public:
   static int length;
 public:
   DepthFinderSensor(Sector* sec, int offsetX);

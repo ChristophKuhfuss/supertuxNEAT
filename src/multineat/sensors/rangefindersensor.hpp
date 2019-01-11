@@ -7,7 +7,7 @@
 class RangeFinderSensor : public Sensor {
   friend class ExperimentParameterParser;
   
-protected:
+public:
   static int length;
 public:
   RangeFinderSensor(Sector* sec, int offsetY);

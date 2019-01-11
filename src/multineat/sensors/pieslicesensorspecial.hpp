@@ -9,7 +9,7 @@
 class PieSliceSensorSpecial : public PieSliceSensor {
  friend class ExperimentParameterParser;
 
-protected:
+public:
   static int radius_special;
   
 public:

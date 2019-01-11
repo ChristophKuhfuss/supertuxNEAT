@@ -132,9 +132,9 @@ bool TuxEvolution::tux_epoch()
 
 // Calculates fitness of current genome and marks the evaluated flag
 // Returns the result of advance_genome(), which is false if the simulation finished
-bool TuxEvolution::on_tux_death(float progress, float airtime, float groundtime, int num_jumps, OutputQuotas q)
+bool TuxEvolution::on_tux_death(float progress, float ground_distance, float airtime, float groundtime, int num_jumps, OutputQuotas q)
 {
-  double fitness = tux_evaluate(progress, airtime, groundtime, num_jumps);
+  double fitness = tux_evaluate(progress, ground_distance, airtime, groundtime, num_jumps);
 //   std::cout << "Organism #" << cur_genome->GetID() << " achieved a fitness of " << fitness << "." << std::endl;
   
   if (!viewing_mode) {
@@ -149,22 +149,26 @@ bool TuxEvolution::on_tux_death(float progress, float airtime, float groundtime,
   }
 }
 
-double TuxEvolution::tux_evaluate(float progress, float airtime, float groundtime, int num_jumps)
+double TuxEvolution::tux_evaluate(float progress, float ground_distance, float airtime, float groundtime, int num_jumps)
 {
-  float fitness = progress;
+  
+//   float fitness = progress;
+  
+  float fitness = ground_distance;
+  
+  if (reward_groundtime)
+    fitness *= groundtime;
   
   if (regularize_airtime)
     fitness = std::max(0.0, (double) fitness - airtime * 10);
   
   if (regularize_jumps)
-    fitness = std::max(0.0, (double) fitness - num_jumps * 5);
-  
-  if (reward_groundtime)
-    fitness += groundtime * 20;
+    fitness = std::max(0.0, (double) fitness - num_jumps);
   
   if (fitness > top_fitness) {
     top_fitness = fitness;
   }
+    
   return fitness;
 }
 
@@ -226,8 +230,8 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   std::vector<std::shared_ptr<PieSliceSensor>>*    pssensors = sm->get_cur_pieslice_sensors();
   
   // First, calculate maximum x and y coordinates so we can normalize substrate coordinates to (-1, 1)
-  int maxX = 0;
-  int maxY = 0;
+  int maxX = RangeFinderSensor::length / 2;
+  int maxY = DepthFinderSensor::length / 2;
   
   double inputZ = -1;
   double outputZ = 1;
@@ -244,7 +248,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
       hidden_coords.push_back(coords);
     } else {
       // If there are more than one, arrange in a circle
-      coords.push_back(1);
+      coords.push_back(0.5);
       coords.push_back(0);
       coords.push_back(hiddenZ);
       
@@ -253,14 +257,14 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
       // How many neurons per full rotation?
       double angle_step = 2 * M_PI / num_hidden_start_neurons;
       
-      for (int i = 0; i < num_hidden_start_neurons - 1; i++) {
+      for (int i = 0; i < num_hidden_start_neurons; i++) {
 	// Push back coordinates, rotate by the angle step each iteration
 	hidden_coords.push_back(coords);
 	
 	std::vector<double> coords_new;
 	
-	coords_new.push_back(coords.at(0) * cos(angle_step) + coords.at(1) * sin(angle_step));
-	coords_new.push_back(coords.at(1) * cos(angle_step) - coords.at(0) * sin(angle_step));
+	coords_new.push_back((coords.at(0) * cos(angle_step) + coords.at(1) * sin(angle_step)));
+	coords_new.push_back((coords.at(1) * cos(angle_step) - coords.at(0) * sin(angle_step)));
 	coords_new.push_back(hiddenZ);
 
 	coords = coords_new;
@@ -273,7 +277,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v = (*it)->get_offset();
     
     // Get middle point of the RangeFinderSensor
-    int x = abs(v.x / 2.0);
+    int x = abs(RangeFinderSensor::length / 2.0);
     int y = abs(v.y);
     
     if (x > maxX)
@@ -290,13 +294,37 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     
     // Get middle point of the DepthFinderSensor
     int x = abs(v.x);
-    int y = abs(v.y / 2.0);
+    int y = abs(DepthFinderSensor::length / 2.0);
     
     if (x > maxX) 
       maxX = x;
     
     if (y > maxY)
       maxY = y;
+    
+  }
+  
+  for (std::vector<std::shared_ptr<PieSliceSensor>>::iterator it = pssensors->begin(); it != pssensors->end(); ++it)
+  {
+    Vector v = (*it)->get_offset();
+    
+    // Get middle point of the DepthFinderSensor
+    int x = abs(v.x);
+    int y = abs(v.y);
+    
+    Vector v2 = (*it)->get_offset2();
+    
+    int x2 = abs(v2.x);
+    int y2 = abs(v2.y);
+    
+    int x_middle = (x + x2) / 3;
+    int y_middle = (y + y2) / 3;
+    
+    if (x_middle > maxX) 
+      maxX = x_middle;
+    
+    if (y_middle > maxY)
+      maxY = y_middle;
     
   }
   
@@ -307,11 +335,11 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v = (*it)->get_offset();
     
     // Normalize between (0, 1) and then between (-1, 1)
-    coords.push_back(v.x / (double) maxX);
+    coords.push_back(RangeFinderSensor::length / 2 / (double) maxX);
     coords.push_back(v.y / (double) maxY);
     
-    coords.push_back(v.x);
-    coords.push_back(v.y);
+//     coords.push_back(v.x);
+//     coords.push_back(v.y);
     
     if (num_hidden_start_neurons > 0) coords.push_back(inputZ);
     
@@ -325,10 +353,10 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v = (*it)->get_offset();
     
     coords.push_back((v.x / (double) maxX));
-    coords.push_back((v.y / (double) maxY));
+    coords.push_back((DepthFinderSensor::length / 2 / (double) maxY));
     
-    coords.push_back(v.x);
-    coords.push_back(v.y);
+//     coords.push_back(v.x);
+//     coords.push_back(v.y);
     
     if (num_hidden_start_neurons > 0) coords.push_back(inputZ);
     
@@ -342,7 +370,7 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
     Vector v1 = (*it)->get_offset();
     Vector v2 = (*it)->get_offset2();
     
-    // Same procedure as above, third point is (0, 0)    
+    // Same procedure as above, third point is (0, 0)
     coords.push_back(((v1.x + v2.x) / 3.0) / (double) maxX);
     coords.push_back(((v1.y + v2.y) / 3.0) / (double) maxY);
     if (num_hidden_start_neurons > 0) coords.push_back(inputZ);
@@ -410,8 +438,35 @@ void TuxEvolution::generate_substrate(SensorManager* sm)
   
   output_coords.push_back(output);
   
-  // Parameters taken from MultiNEAT's HyperNEAT example
+//   std::cout << "Input coords: " << std::endl;
+//   for (std::vector<vector<double>>::iterator it = input_coords.begin(); it != input_coords.end(); ++it) {
+//     for (std::vector<double>::iterator it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+//       std::cout << (*it2) << " ";
+//     }
+//     std::cout << std::endl;
+//   }
+//   
+//   std::cout << "Hidden coords: " << std::endl;
+//   
+//   for (std::vector<vector<double>>::iterator it = hidden_coords.begin(); it != hidden_coords.end(); ++it) {
+//     for (std::vector<double>::iterator it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+//       std::cout << (*it2) << " ";
+//     }
+//     std::cout << std::endl;
+//   }
+//   
+//   std::cout << "Output coords: " << std::endl;
+//   
+//   for (std::vector<vector<double>>::iterator it = output_coords.begin(); it != output_coords.end(); ++it) {
+//     for (std::vector<double>::iterator it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+//       std::cout << (*it2) << " ";
+//     }
+//     std::cout << std::endl;
+//   }
+//   
+//   std::cout << std::endl;
   
+  // Parameters taken from MultiNEAT's HyperNEAT example  
   substrate = Substrate(input_coords, hidden_coords, output_coords);
   
   substrate.m_allow_hidden_hidden_links = false;

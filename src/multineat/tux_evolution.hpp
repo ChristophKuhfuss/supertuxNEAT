@@ -114,7 +114,7 @@ public:
   TuxEvolution();
   ~TuxEvolution();
     
-  bool on_tux_death(float progress, float airtime, float groundtime, int num_jumps, OutputQuotas q);
+  bool on_tux_death(float progress, float ground_distance, float airtime, float groundtime, int num_jumps, OutputQuotas q);
   void accept_inputs(NeatInputs inputs);
   NeatOutputs get_outputs();
   
@@ -129,7 +129,7 @@ public:
 private:
   static Parameters init_params();
   bool tux_epoch();
-  double tux_evaluate(float progress, float airtime, float groundtime, int num_jumps);
+  double tux_evaluate(float progress, float ground_distance, float airtime, float groundtime, int num_jumps);
   void propagate_inputs();
   bool advance_genome();
   void refresh_genome_list();

@@ -9,9 +9,10 @@
 class PieSliceSensor : public Sensor {
   friend class ExperimentParameterParser;
   
-protected:
+public:
   static int radius;
-  
+
+protected:
   double angle1;
   double angle2;
   

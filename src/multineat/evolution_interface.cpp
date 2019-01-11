@@ -28,7 +28,8 @@ remaining_jump_ticks(0),
 jump_skip_next_frame(false),
 num_jumps(0),
 idle(0),
-fitness_idle(0)
+fitness_idle(0),
+ground_distance(0)
 {
 }
 
@@ -56,7 +57,12 @@ void EvolutionInterface::update(float elapsed_time)
   ticks_total++;
   
   if (!tux->on_ground()) ticks_airtime++;
-  else ticks_groundtime++;
+  else {
+    if (tux->get_pos().x > max_x)
+      ground_distance += tux->get_pos().x - max_x;
+    
+    ticks_groundtime++;
+  }
   
   update_idle(elapsed_time);
   
@@ -167,9 +173,10 @@ void EvolutionInterface::on_tux_death()
     q.qAction = ticks_action / (double) ticks_total;
   }
   
-  if (!neat.on_tux_death(tux->get_pos().x, ticks_airtime / (float) ticks_total, ticks_groundtime / (float) ticks_total, num_jumps, q)) {
+  if (!neat.on_tux_death(tux->get_pos().x, ground_distance, ticks_airtime / (float) ticks_total, ticks_groundtime / (float) ticks_total, num_jumps, q)) {
     scripting::quit();
   }
+  
   
   idle = 0;
   fitness_idle = 0;
@@ -184,6 +191,8 @@ void EvolutionInterface::on_tux_death()
   ticks_airtime = 0;
   ticks_groundtime = 0;
   ticks_total = 0; 
+  
+  ground_distance = 0;
   
   num_jumps = 0;
 }
