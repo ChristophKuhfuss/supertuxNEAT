@@ -40,7 +40,7 @@ int TuxEvolution::db_sleeptime = 50;
 
 bool TuxEvolution::regularize_jumps = false;
 bool TuxEvolution::regularize_airtime = false;
-bool TuxEvolution::reward_groundtime = false;
+bool TuxEvolution::reward_grounddist = false;
 
 TuxEvolution::TuxEvolution() : params(init_params()),
   start_genome(0, SensorManager::get_total_sensor_count() + 1, num_hidden_start_neurons, 
@@ -154,10 +154,10 @@ double TuxEvolution::tux_evaluate(float progress, float ground_distance, float a
   
 //   float fitness = progress;
   
-  float fitness = ground_distance;
+  float fitness = progress;
   
-  if (reward_groundtime)
-    fitness *= groundtime;
+  if (reward_grounddist)
+    fitness = ground_distance;
   
   if (regularize_airtime)
     fitness = std::max(0.0, (double) fitness - airtime * 10);

@@ -57,9 +57,9 @@ void ExperimentParameterParser::load()
       if ((int) d)				TuxEvolution::regularize_airtime = true;
       else					TuxEvolution::regularize_airtime = false;
       
-    else if (s == "rewardgroundtime")
-      if ((int) d)				TuxEvolution::reward_groundtime = true;
-      else					TuxEvolution::reward_groundtime = false;
+    else if (s == "rewardgrounddist")
+      if ((int) d)				TuxEvolution::reward_grounddist = true;
+      else					TuxEvolution::reward_grounddist = false;
     else if (s == "hyperneat")
       if ((int) d)				TuxEvolution::hyperneat = true;
       else					TuxEvolution::hyperneat = false;

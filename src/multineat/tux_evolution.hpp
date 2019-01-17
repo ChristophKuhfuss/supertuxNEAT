@@ -85,7 +85,7 @@ public:
   
   static bool regularize_jumps;
   static bool regularize_airtime;
-  static bool reward_groundtime;
+  static bool reward_grounddist;
 
 private:
   Parameters params;
