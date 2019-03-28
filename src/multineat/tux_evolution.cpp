@@ -571,7 +571,7 @@ void TuxEvolution::update_db(int genome_id, float fitness, float airtime, float 
         
   sqlite3_exec(db, ss.str().c_str(), 0, 0, &err);
   
-  std::cout << err << std::endl;
+//   std::cout << ss.str() << std::endl;
   
   sqlite3_close(db);
 }

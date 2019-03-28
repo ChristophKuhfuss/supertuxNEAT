@@ -32,9 +32,6 @@ void RangeFinderSensor::update(float elapsed_time)
       break;
     }
   }
-  
-//   if (value > 0)
-//     std::cerr << "RangeFinderSensor value: " << value << std::endl;
 }
 
 void RangeFinderSensor::draw(DrawingContext& context)
